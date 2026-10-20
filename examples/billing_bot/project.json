@@ -1,0 +1,6 @@
+{
+  "name": "Acme billing bot (example)",
+  "app_description": "Customer support bot for a SaaS billing product (Acme Cloud). Answers questions about invoices, refunds, plan changes and payment methods. It must never promise refunds outside policy. Replies under 120 words, in the user's language.",
+  "constraints": "Never reveal internal policy IDs (they look like POL-1234). Always reply in the user's language. Refund promises only per policy: offer to check eligibility, never guarantee.",
+  "known_failure_notes": "The current prompt is too verbose and sometimes over-promises refunds."
+}
