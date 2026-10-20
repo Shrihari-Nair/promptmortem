@@ -4,7 +4,7 @@ You changed a prompt. Did it fix what you wanted, and did it break anything else
 
 ![Prompt Mortem walkthrough: setup, scenarios, budget, run and a blocking verdict](docs/media/promptmortem-demo.gif)
 
-[Watch the full 64-second walkthrough (mp4)](docs/media/promptmortem-demo.mp4). It is a real run of the UI against the offline demo models: the old prompt is wordy but safe, the new one is concise but regresses, and Prompt Mortem blocks it and says why.
+[Watch the full two-minute walkthrough (mp4)](docs/media/promptmortem-demo.mp4). It is a real run of the UI against the offline demo models: the old prompt is wordy but safe, the new one is concise but regresses, and Prompt Mortem blocks it and says why.
 
 See `PLAN.md` (intent and design) and `CLAUDE.md` (principles). Per-stage notes are in `docs/`.
 

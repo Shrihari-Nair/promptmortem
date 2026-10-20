@@ -40,7 +40,7 @@ const segs = []  // [start, end] seconds of dead time (model calls); post-produc
 const page = await ctx.newPage()
 const wait = (ms) => page.waitForTimeout(ms)
 const fast = async (fn) => { const a = (Date.now() - T0) / 1000; await fn(); const b = (Date.now() - T0) / 1000; if (b - a > 2.5) segs.push([+(a + 0.8).toFixed(2), +b.toFixed(2)]) }
-const PACE = 0.62  // < 1 shortens every caption hold
+const PACE = 1.15  // < 1 shortens every caption hold
 const marks = []  // every caption with its start time, used to cut the short GIF
 const say = async (tag, text, ms = 2600) => {
   marks.push({ t: +((Date.now() - T0) / 1000).toFixed(2), tag, text, hold: +(ms * PACE / 1000).toFixed(2) })
@@ -51,11 +51,11 @@ const hush = () => page.evaluate(() => document.getElementById('pm-cap')?.classL
 const glide = async (loc) => {
   await loc.scrollIntoViewIfNeeded()
   const b = await loc.boundingBox(); if (!b) return
-  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 22 }); await wait(250)
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 38 }); await wait(450)
 }
-const click = async (loc) => { await glide(loc); await loc.click(); await wait(500) }
+const click = async (loc) => { await glide(loc); await loc.click(); await wait(900) }
 const type = async (loc, text, delay = 22) => { await glide(loc); await loc.click(); await loc.pressSequentially(text, { delay }); await wait(300) }
-const fill = async (loc, text) => { await glide(loc); await loc.fill(text); await wait(350) }
+const fill = async (loc, text) => { await glide(loc); await loc.fill(text); await wait(800) }
 const show = async (loc, ms = 2200) => {
   await loc.scrollIntoViewIfNeeded()
   await page.evaluate((el) => scrollBy({ top: el.getBoundingClientRect().top - 130, behavior: 'smooth' }), await loc.elementHandle())
@@ -63,7 +63,7 @@ const show = async (loc, ms = 2200) => {
 }
 const approveAll = async (max) => {  // click every visible Approve button quickly
   const a = page.getByRole('button', { name: 'Approve', exact: true })
-  for (let i = 0; i < max && (await a.count()) > 0; i++) { await a.first().scrollIntoViewIfNeeded(); await a.first().click(); await wait(220) }
+  for (let i = 0; i < max && (await a.count()) > 0; i++) { await a.first().scrollIntoViewIfNeeded(); await a.first().click(); await wait(520) }
 }
 const step = (n) => page.getByRole('button', { name: new RegExp(`^\\d+\\s+${n}\\b`) })
 const scrollBy = async (px, ms = 1600) => { await page.evaluate((y) => scrollBy({ top: y, behavior: 'smooth' }), px); await wait(ms) }
@@ -78,9 +78,9 @@ await click(page.getByRole('button', { name: 'Start validating' }).first())
 
 // 1. Setup
 await say('01 Setup', 'Describe the app. Paste the old and the new prompt.', 1800)
-await fill(page.getByLabel('Project name'), 'Acme billing bot')
-await fill(page.getByLabel('What the app does'), 'Customer support bot for a SaaS billing product. Replies under 120 words, in the user\u2019s language.')
-await fill(page.getByLabel('Non-negotiable constraints'), 'Never promise a refund outside policy. Never reveal policy IDs like POL-1234.')
+await type(page.getByLabel('Project name'), 'Acme billing bot', 55)
+await type(page.getByLabel('What the app does'), 'Customer support bot for a SaaS billing product. Replies under 120 words.', 22)
+await type(page.getByLabel('Non-negotiable constraints'), 'Never promise a refund outside policy.', 28)
 await fill(page.getByLabel('Target model'), 'fake/app'); await fill(page.getByLabel('Judge and agent model'), 'fake/judge')
 await fill(page.getByLabel('Old prompt', { exact: true }), OLD)
 await fill(page.getByLabel('New prompt', { exact: true }), NEW)
@@ -102,7 +102,8 @@ await click(step('Scenarios'))
 await click(page.getByRole('button', { name: 'Generate scenario plan' }))
 await fast(() => page.getByText('Unreviewed', { exact: true }).waitFor()); await wait(600)
 await say('03 Scenarios', 'Test cases for the goal, edge cases and everything you did not touch. You review only the top ones.', 3400)
-await approveAll(10)
+await approveAll(6)
+await wait(800)
 await click(page.getByRole('button', { name: 'Reject', exact: true }).nth(1))
 await fill(page.getByLabel('What is wrong?'), 'Our users write short, messy messages.')
 await say('03 Scenarios', 'Reject one case and the whole cluster goes. Your reason is fed back to the agents.', 2800)
