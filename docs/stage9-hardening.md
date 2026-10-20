@@ -1,0 +1,7 @@
+# Stage 9: Hardening (M9)
+
+**Auth:** optional single-user token. Set `PV_API_TOKEN`; every call except `/health` needs `Authorization: Bearer <token>`, `X-API-Token`, or `?token=` (EventSource and download links cannot set headers). The UI asks for it on the first 401 and remembers it in the browser. Constant-time comparison. Not multi-user auth.
+**Secrets:** API keys are read from the environment / `.env` only; never stored in the database or returned by the API. `/health` reports which providers have a key (booleans). `core/secrets.py` scrubs key shapes (`AIza...`, `sk-...`, bearer tokens), `?key=` / `api_key=` / `token:` values and the literal values of configured keys from every error text we persist (job errors, run pause reasons, optimization errors).
+**Example project:** `examples/billing_bot/` (project.json, old/new prompts, a 12-row labelled dataset, 15 traces of which 3 are labelled pass/fail for judge calibration). `scripts/pipeline_smoke.py` runs the whole pipeline against a running server with hard caps and `--model fake/app` for a dry run.
+**Browser smoke:** `cd frontend && npm run e2e` drives the whole wizard (Setup to Refine) in headless Chromium against a real server and the fake LLM, and fails on any uncaught JS error, console error or 5xx.
+**Bugs this stage's checks found and fixed:** unlabelled traces counted as labelled in calibration (JSON-null vs SQL NULL); an exact-match metric added for free-text gold answers; redaction missing `api_key=` forms and bearer tokens.
