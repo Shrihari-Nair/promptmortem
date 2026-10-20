@@ -23,10 +23,10 @@ function Uploader({ id, title, hint, vars, value, onChange, accept }: { id: stri
   return (
     <div className="space-y-2">
       <label htmlFor={id} className="block text-[13px] font-medium">{title}</label>
-      <input id={id} type="file" accept={accept} onChange={(e) => pick(e.target.files?.[0])} className="block w-full text-[13px] file:mr-3 file:h-8 file:cursor-pointer file:rounded-md file:border file:border-line-strong file:bg-surface file:px-3 file:text-[13px] file:text-ink hover:file:bg-sunken" />
+      <input id={id} type="file" accept={accept} onChange={(e) => pick(e.target.files?.[0])} className="block w-full text-[13px] file:mr-3 file:h-8 file:cursor-pointer file:rounded-full file:border file:border-line-strong file:bg-surface file:px-3 file:text-[13px] file:text-ink hover:file:bg-sunken" />
       <p className="text-xs text-muted">{hint}</p>
       {value && (
-        <div className="space-y-2 rounded-md bg-sunken p-3">
+        <div className="space-y-2 rounded-xl bg-sunken p-3">
           <p className="text-xs text-muted">{value.name} has the columns: {value.cols.join(', ') || 'none found'}</p>
           <div className="flex flex-wrap gap-4">
             {vars.map((v) => (
@@ -94,7 +94,8 @@ export default function Setup({ onCreated }: { onCreated: (p: Project) => void }
   const keyOk = health.data && Object.values(health.data.keys).some(Boolean)
   const diff = lineDiff(oldP.split('\n'), newP.split('\n'))
   return (
-    <div className="max-w-[880px]">
+    <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
+    <div className="min-w-0">
       <PageHeader title="Set up the comparison" description="Describe your app and paste the prompt before and after your change. Nothing is sent to a model until you start analysing." />
       {health.data && (
         <Notice tone={keyOk ? 'good' : 'warn'} className="mb-8">
@@ -124,7 +125,7 @@ export default function Setup({ onCreated }: { onCreated: (p: Project) => void }
           <Textarea mono label="Old prompt" rows={12} value={oldP} onChange={(e) => setOldP(e.target.value)} />
           <Textarea mono label="New prompt" rows={12} value={newP} onChange={(e) => setNewP(e.target.value)} />
         </div>
-        <div className="mt-5 space-y-3 rounded-lg bg-sunken p-4">
+        <div className="mt-5 space-y-3 rounded-2xl bg-sunken p-4">
           <Textarea label="Or describe the change and let the tool draft the new prompt" help="The draft fills the new prompt above. Review and edit it; nothing is saved until you continue." rows={2} placeholder="Answer in under 120 words and never promise refunds." value={change} onChange={(e) => setChange(e.target.value)} />
           <Button variant="secondary" size="sm" disabled={!oldP.trim() || !change.trim() || drafting} onClick={draft}>{drafting ? 'Drafting' : 'Draft new prompt'}</Button>
           {draftNotes.length > 0 && <ul className="list-disc space-y-0.5 pl-5 text-[13px] text-muted">{draftNotes.map((n, i) => <li key={i}>{n}</li>)}</ul>}
@@ -133,7 +134,7 @@ export default function Setup({ onCreated }: { onCreated: (p: Project) => void }
         {(oldP || newP) && (
           <figure className="mt-5">
             <figcaption className="mb-1.5 text-[13px] font-medium">Difference</figcaption>
-            <pre className="max-h-52 overflow-auto rounded-md border border-line bg-surface p-2 font-mono text-[12px] leading-5">
+            <pre className="max-h-52 overflow-auto rounded-2xl border border-line bg-surface p-2 font-mono text-[12px] leading-5">
               {diff.map((d, i) => <div key={i} className={d.t === '+' ? 'bg-good-soft text-good' : d.t === '-' ? 'bg-bad-soft text-bad' : 'text-muted'}>{d.t} {d.s}</div>)}
             </pre>
           </figure>
@@ -163,6 +164,18 @@ export default function Setup({ onCreated }: { onCreated: (p: Project) => void }
         <Button disabled={!f.name || !oldP || !newP || create.isPending} onClick={() => create.mutate()}>{create.isPending ? 'Saving' : 'Save and continue'}</Button>
         {create.error && <p role="alert" className="text-[13px] text-bad">{String(create.error)}</p>}
       </div>
+    </div>
+    <aside aria-label="What happens next" className="bezel hidden lg:sticky lg:top-28 lg:block">
+      <div className="core p-6">
+        <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted">What happens next</p>
+        <ol className="mt-5 space-y-4 text-[13px]">
+          {[['Understand', 'It reads your app and the diff.'], ['Scenarios', 'Test inputs, and you review the top ones.'], ['Metrics', 'Checks in code first, blind judges second.'], ['Budget', 'Cost estimate, with coverage lost per tier.'], ['Run', 'Old vs new, noise measured.'], ['Report', 'A verdict with a scope stamp.']].map(([t, d], i) => (
+            <li key={t} className="flex gap-3"><span className="tnum flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-soft font-mono text-[11px] text-accent">{i + 2}</span><span><b className="font-medium">{t}</b><span className="block text-muted">{d}</span></span></li>
+          ))}
+        </ol>
+        <p className="mt-6 border-t border-line pt-4 text-xs text-muted">Nothing is sent to a model until you start analysing.</p>
+      </div>
+    </aside>
     </div>
   )
 }

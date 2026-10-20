@@ -96,7 +96,7 @@ function MetricRow({ m, cal, onChange }: { m: Metric; cal?: Calibration; onChang
         </p>
       )}
       {preview && (
-        <div className="mt-4 overflow-x-auto rounded-md border border-line">
+        <div className="mt-4 overflow-x-auto rounded-2xl border border-line">
           <table className="w-full table-fixed text-left text-[13px]">
             <caption className="sr-only">Preview of this metric on sample outputs</caption>
             <thead className="bg-sunken text-xs text-muted"><tr><th className="w-1/4 p-2 font-medium">Input</th><th className="w-2/5 p-2 font-medium">Output</th><th className="p-2 font-medium">Result</th></tr></thead>

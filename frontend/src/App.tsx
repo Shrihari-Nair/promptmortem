@@ -5,6 +5,7 @@ import { api } from './api'
 import { AskProvider } from './components/ui/ask'
 import { Button } from './components/ui/button'
 import { Notice } from './components/ui/page'
+import { StepContext } from './lib/stepctx'
 import { useTheme, type Theme } from './lib/theme'
 import Budget from './pages/Budget'
 import Home from './pages/Home'
@@ -112,7 +113,7 @@ function Shell() {
             <Button variant="secondary" size="sm" className="ml-auto" onClick={async () => { await api(`/projects/${project.id}/stale/${step}/ack`, { method: 'POST' }); queryClient.invalidateQueries({ queryKey: ['stale', project.id] }) }}>Mark as reviewed</Button>
           </Notice>
         )}
-        <div key={step} className="rise">{page()}</div>
+        <StepContext.Provider value={{ n: String(STEPS.indexOf(step) + 1).padStart(2, '0'), name: step }}><div key={step} className="rise">{page()}</div></StepContext.Provider>
         </>)}
       </main>
     </div>

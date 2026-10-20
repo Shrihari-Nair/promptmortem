@@ -59,8 +59,8 @@ function CaseItem({ r, repId, onChange, kind }: { r: ReportRow; repId: string; o
       <p className="mt-2 max-w-[80ch] text-[13px] text-muted"><span className="font-medium text-ink">Input:</span> {txt(r.input)}</p>
       {r.old_output != null && (
         <div className="mt-3 grid gap-3 text-[13px] leading-relaxed md:grid-cols-2">
-          <div className="rounded-md bg-sunken p-3"><p className="mb-1 text-xs font-medium text-muted">Old output</p>{r.old_output}</div>
-          <div className={`rounded-md p-3 ${kind === 'regression' ? 'bg-bad-soft' : 'bg-good-soft'}`}><p className="mb-1 text-xs font-medium text-muted">New output</p>{r.new_output}</div>
+          <div className="rounded-xl bg-sunken p-3"><p className="mb-1 text-xs font-medium text-muted">Old output</p>{r.old_output}</div>
+          <div className={`rounded-xl p-3 ${kind === 'regression' ? 'bg-bad-soft' : 'bg-good-soft'}`}><p className="mb-1 text-xs font-medium text-muted">New output</p>{r.new_output}</div>
         </div>
       )}
       {r.rationale && <p className="mt-2 max-w-[80ch] text-xs text-muted">Judge: {r.rationale}</p>}
@@ -95,7 +95,7 @@ export default function ReportPage({ project }: { project: Project }) {
   const q = useQuery({ queryKey: ['report', runId], enabled: !!runId, queryFn: () => api<{ id: string; summary: Report }>(`/runs/${runId}/report`) })
   const refresh = () => qc.invalidateQueries({ queryKey: ['report', runId] })
   const job = useJob(jobId, refresh)
-  if (!runId) return <div className="max-w-[880px]"><PageHeader title="Report" /><EmptyState icon={<ListMagnifyingGlass size={28} />} title="There is no run to report on yet">Start a run in the Run step. The report appears here, and a stopped or paused run gets a report that says it is partial.</EmptyState></div>
+  if (!runId) return <div className="max-w-[1000px]"><PageHeader title="Report" /><EmptyState icon={<ListMagnifyingGlass size={28} />} title="There is no run to report on yet">Start a run in the Run step. The report appears here, and a stopped or paused run gets a report that says it is partial.</EmptyState></div>
   if (!q.data) return <div aria-busy="true" className="space-y-4"><Skeleton className="h-8 w-1/4" /><Skeleton className="h-40" /><Skeleton className="h-24" /></div>
   const { id, summary: r } = q.data
   const h = r.headline, s = r.scope
@@ -114,18 +114,19 @@ export default function ReportPage({ project }: { project: Project }) {
         </>}
       />
 
-      <section aria-label="Verdict" className="bezel"><div className="core p-6">
-        <div className="flex items-start gap-3">
-          <Badge tone={levelTone(h.level)} className="mt-1 px-2.5 py-1 text-[13px]">{LEVEL[h.level] ?? h.level}</Badge>
-          <p className="max-w-[62ch] text-lg font-medium leading-snug">{h.recommendation}</p>
+      <section aria-label="Verdict" className="bezel"><div className="core relative overflow-hidden p-6 md:p-9">
+        <div aria-hidden className="pointer-events-none absolute -right-24 -top-32 size-[28rem] rounded-full opacity-40 blur-3xl" style={{ background: `radial-gradient(closest-side, var(--${h.level === 'block' ? 'bad' : h.level === 'ok' ? 'good' : 'warn'}), transparent)` }} />
+        <div className="relative flex items-start gap-4">
+          <Badge tone={levelTone(h.level)} className="mt-1.5 px-3.5 py-1 text-sm">{LEVEL[h.level] ?? h.level}</Badge>
+          <p className="max-w-[40ch] text-2xl font-semibold leading-tight tracking-tight md:text-[1.75rem]">{h.recommendation}</p>
         </div>
-        <p className="mt-1.5 text-xs text-muted">Advisory, produced by rules. Never a claim beyond what was tested.</p>
-        <dl className="mt-6 flex flex-wrap gap-x-12 gap-y-4 border-t border-line pt-5">
+        <p className="relative mt-3 text-xs text-muted">Advisory, produced by rules. Never a claim beyond what was tested.</p>
+        <dl className="relative mt-8 flex flex-wrap gap-x-14 gap-y-4 border-t border-line pt-6">
           {([['fixed', 'text-good', 'Fixed'], ['broken', 'text-bad', 'Broken'], ['unchanged', 'text-ink', 'Unchanged'], ['inconclusive', 'text-muted', 'Inconclusive']] as const).map(([k, c, label]) => (
-            <div key={k}><dd className={`tnum text-3xl font-semibold tracking-tight ${h[k] === 0 && k !== 'unchanged' ? 'text-muted' : c}`}>{h[k]}</dd><dt className="text-xs text-muted">{label}</dt></div>
+            <div key={k}><dd className={`tnum text-5xl font-semibold tracking-tighter ${h[k] === 0 && k !== 'unchanged' ? 'text-muted' : c}`}>{h[k]}</dd><dt className="text-xs text-muted">{label}</dt></div>
           ))}
         </dl>
-        <p className="tnum mt-5 text-[13px]">Net effect (mean paired difference): <b>{h.net_effect.mean_diff}</b>, 95% interval {h.net_effect.ci95[0]} to {h.net_effect.ci95[1]}.</p>
+        <p className="tnum relative mt-6 text-[13px]">Net effect (mean paired difference): <b>{h.net_effect.mean_diff}</b>, 95% interval {h.net_effect.ci95[0]} to {h.net_effect.ci95[1]}.</p>
       </div></section>
 
       <Section title="Scope stamp" description="What this verdict does and does not cover." className="mt-10">
@@ -148,7 +149,7 @@ export default function ReportPage({ project }: { project: Project }) {
 
       <Section title="Per metric" description="Mean difference (new minus old) with a 95% interval. Left of zero is worse.">
         <MetricChart rows={r.per_metric} />
-        <div className="mt-4 overflow-x-auto rounded-lg border border-line">
+        <div className="mt-4 overflow-x-auto rounded-2xl border border-line">
           <table className="w-full text-left text-[13px]">
             <caption className="sr-only">Per-metric results</caption>
             <thead className="bg-sunken text-xs text-muted"><tr><th className="p-2.5 font-medium">Metric</th><th className="p-2.5 font-medium">Cases</th><th className="p-2.5 font-medium">Old</th><th className="p-2.5 font-medium">New</th><th className="p-2.5 font-medium">Difference (95% interval)</th><th className="p-2.5 text-right font-medium">Test p</th></tr></thead>
@@ -161,7 +162,7 @@ export default function ReportPage({ project }: { project: Project }) {
               </tr>))}</tbody>
           </table>
         </div>
-        <div className="mt-6 overflow-x-auto rounded-lg border border-line">
+        <div className="mt-6 overflow-x-auto rounded-2xl border border-line">
           <table className="w-full text-left text-[13px]">
             <caption className="sr-only">Results per category</caption>
             <thead className="bg-sunken text-xs text-muted"><tr><th className="p-2.5 font-medium">Category</th><th className="p-2.5 font-medium">Fixed</th><th className="p-2.5 font-medium">Broken</th><th className="p-2.5 font-medium">Unchanged</th><th className="p-2.5 font-medium">Inconclusive</th></tr></thead>

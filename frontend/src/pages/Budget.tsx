@@ -80,7 +80,7 @@ export default function Budget({ project }: { project: Project }) {
         <>
           {est.warnings?.map((w, i) => <Notice key={i} tone="warn" role="alert" className="mb-6">{w}</Notice>)}
           <Section title="Choose a tier" description={`${est.protected_scenarios} pinned or high-severity cases are never trimmed automatically. Per-call prices were measured on a probe that cost ${usd(est.probe.paid)}; lever savings are estimates until a run measures them.`}>
-            <div className="overflow-x-auto rounded-lg border border-line">
+            <div className="overflow-x-auto rounded-2xl border border-line">
               <table className="w-full text-left text-[13px]">
                 <caption className="sr-only">Tiers with cost range and coverage lost</caption>
                 <thead className="bg-sunken text-xs text-muted">
@@ -127,7 +127,7 @@ export default function Budget({ project }: { project: Project }) {
                   <label className="flex items-center gap-2"><input type="checkbox" className="size-4 accent-[var(--accent)]" checked={unlock} onChange={(e) => setUnlock(e.target.checked)} />Allow dropping pinned and high-severity cases (needs this explicit confirmation)</label>
                   <Button size="sm" variant="secondary" disabled={busy} onClick={async () => { await estimate(levers, 'trim', { scenario_ids: [...sel], confirm_drop_protected: unlock }); setTier('custom') }}>Estimate selection</Button>
                 </div>
-                <div className="max-h-96 overflow-auto rounded-lg border border-line">
+                <div className="max-h-96 overflow-auto rounded-2xl border border-line">
                   <table className="w-full text-left text-[13px]">
                     <caption className="sr-only">Cases by priority</caption>
                     <thead className="sticky top-0 bg-sunken text-xs text-muted"><tr><th className="w-10 p-2"><span className="sr-only">Include</span></th><th className="p-2 font-medium">Priority</th><th className="p-2 font-medium">Severity</th><th className="p-2 font-medium">Category</th><th className="p-2 font-medium">Case</th></tr></thead>

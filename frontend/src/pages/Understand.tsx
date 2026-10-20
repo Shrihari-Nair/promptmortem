@@ -33,7 +33,7 @@ export default function Understand({ project }: { project: Project }) {
   const setChange = (i: number, patch: Partial<Change>) => save('diff', { changes: changes.map((c, j) => (j === i ? { ...c, ...patch } : c)) })
 
   return (
-    <div className="max-w-[880px]">
+    <div className="max-w-[1000px]">
       <PageHeader
         title="What the tool understood"
         description="Check what the agents think your app does and which behaviours your change could affect. Fix anything that is wrong; your edits are used by every later step."
@@ -82,8 +82,8 @@ export default function Understand({ project }: { project: Project }) {
                   </div>
                 </div>
                 <div className="grid gap-3 font-mono text-[12px] leading-5 md:grid-cols-2">
-                  <div className="rounded-md bg-bad-soft p-2.5 text-bad">{c.old_text ?? <em>nothing before</em>}</div>
-                  <div className="rounded-md bg-good-soft p-2.5 text-good">{c.new_text ?? <em>removed</em>}</div>
+                  <div className="rounded-xl bg-bad-soft p-2.5 text-bad">{c.old_text ?? <em>nothing before</em>}</div>
+                  <div className="rounded-xl bg-good-soft p-2.5 text-good">{c.new_text ?? <em>removed</em>}</div>
                 </div>
                 <Input label="Intent" defaultValue={c.intent} onBlur={(e) => e.target.value !== c.intent && setChange(i, { intent: e.target.value })} />
                 <ListField label="Could affect" value={c.could_affect} onChange={(v) => setChange(i, { could_affect: v })} />

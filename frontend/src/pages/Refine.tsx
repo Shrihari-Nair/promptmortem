@@ -18,7 +18,7 @@ function Diff({ text, label }: { text: string; label: string }) {
     <div>
       <h5 className="mb-1.5 text-xs font-medium text-muted">{label}</h5>
       {!text ? <p className="text-[13px] text-muted">No difference.</p> : (
-        <pre className="max-h-56 overflow-auto rounded-md border border-line bg-surface p-2 font-mono text-[12px] leading-5">
+        <pre className="max-h-56 overflow-auto rounded-2xl border border-line bg-surface p-2 font-mono text-[12px] leading-5">
           {text.split('\n').map((l, i) => <div key={i} className={l.startsWith('+') && !l.startsWith('+++') ? 'bg-good-soft text-good' : l.startsWith('-') && !l.startsWith('---') ? 'bg-bad-soft text-bad' : 'text-muted'}>{l || ' '}</div>)}
         </pre>
       )}
@@ -27,13 +27,13 @@ function Diff({ text, label }: { text: string; label: string }) {
 }
 
 function HeldOutPanel({ title, h }: { title: string; h?: HeldOut }) {
-  if (!h) return <div className="rounded-md border border-dashed border-line-strong p-3 text-[13px] text-muted">{title}: not validated yet</div>
+  if (!h) return <div className="rounded-xl border border-dashed border-line-strong p-3 text-[13px] text-muted">{title}: not validated yet</div>
   const report = async () => {
     const r = await api<{ id: string }>(`/runs/${h.run_id}/report`)
     window.open(withToken(`/api/reports/${r.id}/export?format=md`), '_blank')
   }
   return (
-    <div className="space-y-1.5 rounded-md bg-sunken p-3 text-[13px]">
+    <div className="space-y-1.5 rounded-xl bg-sunken p-3 text-[13px]">
       <div className="flex items-center gap-2"><span className="font-medium">{title}</span><Badge tone={levelTone(h.level)}>{LEVEL[h.level] ?? h.level}</Badge>{h.status !== 'done' && <Badge tone="warn">{h.status}</Badge>}</div>
       <p>{h.recommendation}</p>
       <p className="tnum text-muted">Fixed {h.counts.fixed}, broken {h.counts.broken}, unchanged {h.counts.unchanged}, inconclusive {h.counts.inconclusive}, on {h.scope.tested} held-out cases.</p>

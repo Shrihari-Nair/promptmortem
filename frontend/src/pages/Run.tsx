@@ -73,7 +73,7 @@ export default function Run({ project, goReport }: { project: Project; goReport:
   const finished = !st || ['done', 'stopped', 'failed'].includes(st.status)
 
   return (
-    <div className="max-w-[880px]">
+    <div className="max-w-[1000px]">
       <PageHeader
         title="Run"
         description="A smoke test first, then your chosen tier, then extra cases near any regression. Spending is capped: the run pauses and asks when it reaches the cap."

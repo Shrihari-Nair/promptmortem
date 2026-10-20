@@ -26,7 +26,7 @@ function Heatmap({ cov, active, onPick }: { cov: Coverage; active: string; onPic
               return (
                 <button key={cid} title={`${cov.clusters[cid]?.name}: ${n}`} aria-label={`Cluster ${cov.clusters[cid]?.name}, ${n} scenarios`} aria-pressed={active === cid}
                   onClick={() => onPick(active === cid ? '' : cid)}
-                  className={`tnum h-8 min-w-10 rounded-md px-2 text-xs font-medium transition-shadow duration-150 hover:shadow-panel ${active === cid ? 'ring-2 ring-ink' : ''}`}
+                  className={`tnum h-8 min-w-10 rounded-lg px-2 text-xs font-medium transition-shadow duration-150 hover:shadow-panel ${active === cid ? 'ring-2 ring-ink' : ''}`}
                   style={{ background: `color-mix(in srgb, var(--accent) ${Math.round(12 + 78 * share)}%, var(--surface))`, color: share > 0.55 ? 'var(--canvas)' : 'var(--ink)' }}>
                   {n}
                 </button>
@@ -173,7 +173,7 @@ export default function Scenarios({ project }: { project: Project }) {
             title={view === 'queue' ? 'Review queue' : 'All scenarios'}
             description={view === 'queue' ? 'Cluster representatives, cases the critic is unsure about, and the most change-relevant case per cluster. Unreviewed cases still run and are reported as unreviewed.' : undefined}
             actions={<div className="flex items-end gap-2">
-              <div role="group" aria-label="List view" className="flex rounded-md border border-line-strong p-0.5">
+              <div role="group" aria-label="List view" className="flex rounded-2xl border border-line-strong p-0.5">
                 {(['queue', 'all'] as const).map((v) => <button key={v} aria-pressed={view === v} onClick={() => setView(v)} className={`h-7 rounded px-2.5 text-[13px] transition-colors duration-150 ${view === v ? 'bg-ink text-canvas' : 'text-muted hover:text-ink'}`}>{v === 'queue' ? 'Review queue' : 'All'}</button>)}
               </div>
               {view === 'all' && <Select label="Status" hideLabel value={status} onChange={(e) => setStatus(e.target.value)}><option value="">Any status</option>{['proposed', 'approved', 'edited', 'rejected'].map((x) => <option key={x}>{x}</option>)}</Select>}

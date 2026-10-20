@@ -2,7 +2,7 @@ import * as React from 'react'
 import { cn } from '../../lib/utils'
 
 export const controlClass =
-  'w-full rounded-md border border-line-strong bg-surface px-3 text-sm text-ink placeholder:text-muted/60 transition-colors duration-150 hover:border-muted focus-visible:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-50 aria-[invalid=true]:border-bad'
+  'w-full rounded-xl border border-line-strong bg-canvas/60 px-3.5 text-sm text-ink placeholder:text-muted/60 transition-[border-color,box-shadow] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-muted focus-visible:border-accent focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/20 disabled:opacity-50 aria-[invalid=true]:border-bad'
 
 type Common = { label: string; help?: string; error?: string; className?: string; hideLabel?: boolean }
 
@@ -20,7 +20,7 @@ const describe = (id: string, help?: string, error?: string) => (error ? `${id}-
 
 export const Input = React.forwardRef<HTMLInputElement, Common & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'className'>>(({ label, help, error, className, hideLabel, ...p }, ref) => {
   const id = React.useId()
-  return <Wrap {...{ id, label, help, error, className, hideLabel }}><input ref={ref} id={id} aria-invalid={!!error} aria-describedby={describe(id, help, error)} className={cn(controlClass, 'h-9')} {...p} /></Wrap>
+  return <Wrap {...{ id, label, help, error, className, hideLabel }}><input ref={ref} id={id} aria-invalid={!!error} aria-describedby={describe(id, help, error)} className={cn(controlClass, 'h-10')} {...p} /></Wrap>
 })
 Input.displayName = 'Input'
 
@@ -32,6 +32,6 @@ Textarea.displayName = 'Textarea'
 
 export const Select = React.forwardRef<HTMLSelectElement, Common & Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'className'>>(({ label, help, error, className, hideLabel, children, ...p }, ref) => {
   const id = React.useId()
-  return <Wrap {...{ id, label, help, error, className, hideLabel }}><select ref={ref} id={id} aria-invalid={!!error} aria-describedby={describe(id, help, error)} className={cn(controlClass, 'h-9 pr-8')} {...p}>{children}</select></Wrap>
+  return <Wrap {...{ id, label, help, error, className, hideLabel }}><select ref={ref} id={id} aria-invalid={!!error} aria-describedby={describe(id, help, error)} className={cn(controlClass, 'h-10 pr-8')} {...p}>{children}</select></Wrap>
 })
 Select.displayName = 'Select'
