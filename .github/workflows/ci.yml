@@ -1,0 +1,38 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  secrets:   # no key may ever be pushed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/check_secrets.py
+  backend:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: backend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install -g promptfoo   # lets the Promptfoo export parity test run for real
+      - run: uv sync
+      - run: PROMPTFOO_BIN="$(which promptfoo)" uv run pytest -q   # fake LLM only: no API key is used or needed
+  frontend:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: frontend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+  e2e:   # the whole wizard in a real browser, against a real server and the deterministic fake LLM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: cd backend && uv sync
+      - run: cd frontend && npm ci && npx playwright install --with-deps chromium && npm run e2e
