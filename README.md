@@ -2,6 +2,10 @@
 
 You changed a prompt. Did it fix what you wanted, and did it break anything else? This tool answers that without a labelled dataset: agents plan scenarios and metrics (you steer at every step), run the old and new prompt side by side, and report paired, noise-adjusted results scoped to what was actually tested. Optionally it proposes a refined prompt (DSPy GEPA) and validates it on held-out scenarios.
 
+![Prompt Mortem walkthrough: setup, scenarios, budget, run and a blocking verdict](docs/media/promptmortem-demo.gif)
+
+[Watch the full 64-second walkthrough (mp4)](docs/media/promptmortem-demo.mp4). It is a real run of the UI against the offline demo models: the old prompt is wordy but safe, the new one is concise but regresses, and Prompt Mortem blocks it and says why.
+
 See `PLAN.md` (intent and design) and `CLAUDE.md` (principles). Per-stage notes are in `docs/`.
 
 ## Quick start (Docker, one command)
@@ -78,3 +82,14 @@ the M6 gate (`tests/test_m6.py`).
 
 Single-turn text prompts; single-user local app; declarative programmatic metrics (no generated code is ever executed); Promptfoo export and
 generic JSONL traces (Langfuse/LangSmith connectors and multi-turn are v2).
+
+## Re-record the demo
+
+With the app running (Docker or local), from `frontend/`:
+
+```bash
+npm i && npx playwright install chromium
+BASE_URL=http://localhost:8000 OUT=./demo-out node demo/record.mjs
+```
+
+`demo/record.mjs` drives the real UI with captions and writes a `.webm` plus the timing of every caption and every wait on a model call. It uses the offline `fake/*` models, so it costs nothing and is repeatable.

@@ -31,3 +31,4 @@ coverage/
 # per-machine agent settings (permissions, local paths); the shared skills under .claude/skills and .agents/skills are NOT ignored
 .claude/settings.local.json
 .claude/*.local.*
+brag-output/
