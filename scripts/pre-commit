@@ -1,0 +1,4 @@
+#!/bin/sh
+# Blocks a commit that would contain a key. Install once:  sh scripts/install-git-hooks.sh
+cd "$(git rev-parse --show-toplevel)" || exit 1
+python3 scripts/check_secrets.py || { echo "commit blocked: remove the secret (and rotate it if it was ever pushed)"; exit 1; }
