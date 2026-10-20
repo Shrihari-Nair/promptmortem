@@ -16,6 +16,7 @@ test('the whole wizard works in a browser: setup to refine', async ({ page, requ
 
   // 1. Setup: every field has a visible label; key status is shown (never the key)
   await page.goto('/')
+  await page.getByRole('button', { name: 'Start validating' }).first().click()
   if (process.env.E2E_THEME) await page.getByLabel('Theme').selectOption(process.env.E2E_THEME)
   await expect(page).toHaveTitle('Prompt Change Validator')
   await page.getByLabel('Project name').fill('E2E billing bot')

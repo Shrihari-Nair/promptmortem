@@ -114,7 +114,7 @@ export default function ReportPage({ project }: { project: Project }) {
         </>}
       />
 
-      <section aria-label="Verdict" className="rounded-lg border border-line bg-surface p-6">
+      <section aria-label="Verdict" className="bezel"><div className="core p-6">
         <div className="flex items-start gap-3">
           <Badge tone={levelTone(h.level)} className="mt-1 px-2.5 py-1 text-[13px]">{LEVEL[h.level] ?? h.level}</Badge>
           <p className="max-w-[62ch] text-lg font-medium leading-snug">{h.recommendation}</p>
@@ -126,7 +126,7 @@ export default function ReportPage({ project }: { project: Project }) {
           ))}
         </dl>
         <p className="tnum mt-5 text-[13px]">Net effect (mean paired difference): <b>{h.net_effect.mean_diff}</b>, 95% interval {h.net_effect.ci95[0]} to {h.net_effect.ci95[1]}.</p>
-      </section>
+      </div></section>
 
       <Section title="Scope stamp" description="What this verdict does and does not cover." className="mt-10">
         <DefList>
