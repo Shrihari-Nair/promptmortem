@@ -1,0 +1,33 @@
+# secrets: NEVER commit these (the key lives only in .env; .env.example documents the names with empty values)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+
+# local state (SQLite workspaces hold your scenarios and cached model outputs)
+*.db
+*.db-wal
+*.db-shm
+*.sqlite*
+workspace*
+*.log
+
+# python / node / tooling
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+node_modules/
+dist/
+.vite/
+test-results/
+playwright-report/
+coverage/
+.DS_Store
+
+# per-machine agent settings (permissions, local paths); the shared skills under .claude/skills and .agents/skills are NOT ignored
+.claude/settings.local.json
+.claude/*.local.*
