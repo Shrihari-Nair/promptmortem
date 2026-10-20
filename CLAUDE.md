@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Project: **Prompt Change Validator.** Agentic tool that tells a developer whether a prompt change fixed what they wanted and whether it broke anything else, without requiring a labeled dataset.
+Project: **Prompt Mortem.** Agentic tool that tells a developer whether a prompt change fixed what they wanted and whether it broke anything else, without requiring a labeled dataset.
 
 **Read `PLAN.md` fully before coding.** Sections 0, 0.1, 1, 14, 15, 16 and 17 are normative.
 

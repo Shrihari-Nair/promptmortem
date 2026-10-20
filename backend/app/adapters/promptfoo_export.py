@@ -121,7 +121,7 @@ def build_config(s: Session, project_id: str, scope: str = "plan") -> tuple[dict
                                    "tier": x.tier, "reviewed": x.reviewed, "tags": x.tags},
                       "assert": asserts})
     cfg = {
-        "description": f"{p.name}: old vs new prompt (exported by Prompt Change Validator)",
+        "description": f"{p.name}: old vs new prompt (exported by Prompt Mortem)",
         "prompts": [{"label": "old", "raw": pv["old"].text}, {"label": "new", "raw": pv["new"].text}],
         "providers": [{"id": target_pf, **({} if target_pf == "echo" else {"config": {"temperature": settings.target_temperature}})}],
         "defaultTest": {"options": {"provider": judge_pf}},
@@ -132,7 +132,7 @@ def build_config(s: Session, project_id: str, scope: str = "plan") -> tuple[dict
 
 
 def to_yaml(cfg: dict, warnings: list[str]) -> str:
-    head = ["# Promptfoo config exported by Prompt Change Validator.",
+    head = ["# Promptfoo config exported by Prompt Mortem.",
             "# Run: npx promptfoo@latest eval -c promptfooconfig.yaml --no-cache   (--no-cache so repeats are real samples)",
             "# Assertions are tagged with `metric:` (our metric names). Noise-adjusted paired analysis is not part of Promptfoo."]
     head += [f"# NOTE: {w}" for w in warnings]

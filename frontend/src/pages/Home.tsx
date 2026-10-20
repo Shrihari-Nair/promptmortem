@@ -91,7 +91,7 @@ export default function Home({ start }: { start: () => void }) {
 
       <section aria-labelledby="hero" className="mx-auto grid min-h-[100dvh] max-w-[1280px] items-center gap-16 px-5 pb-24 pt-36 md:grid-cols-[1.05fr_0.95fr] md:px-8">
         <div>
-          <Reveal><Eyebrow>Prompt change validation</Eyebrow></Reveal>
+          <Reveal><Eyebrow>Prompt Mortem</Eyebrow></Reveal>
           <Reveal delay={80}>
             <h1 id="hero" className="mt-6 text-[2.75rem] font-semibold leading-[1.02] tracking-tighter sm:text-6xl lg:text-[4.6rem]">
               Did the prompt change fix it, or <span className="text-gradient sheen pb-1">break something else?</span>
@@ -174,7 +174,7 @@ export default function Home({ start }: { start: () => void }) {
             <div className="relative mt-10 flex justify-center"><CtaButton onClick={start}>Start validating</CtaButton></div>
           </div></div>
         </Reveal>
-        <p className="mt-10 text-center text-xs text-muted">Prompt Change Validator. Runs locally; your keys stay on your machine.</p>
+        <p className="mt-10 text-center text-xs text-muted">Prompt Mortem. Runs locally; your keys stay on your machine.</p>
       </section>
     </div>
   )

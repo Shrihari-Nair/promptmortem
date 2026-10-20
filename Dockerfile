@@ -1,4 +1,4 @@
-# Prompt Change Validator: backend + frontend in ONE image, ONE port.
+# Prompt Mortem: backend + frontend in ONE image, ONE port.
 #   docker compose up --build        then open http://localhost:8000
 # The Gemini (or other provider) key is NEVER baked into the image: it is read at run time from your git-ignored .env.
 

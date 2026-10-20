@@ -18,7 +18,7 @@ test('the whole wizard works in a browser: setup to refine', async ({ page, requ
   await page.goto('/')
   await page.getByRole('button', { name: 'Start validating' }).first().click()
   if (process.env.E2E_THEME) await page.getByLabel('Theme').selectOption(process.env.E2E_THEME)
-  await expect(page).toHaveTitle('Prompt Change Validator')
+  await expect(page).toHaveTitle('Prompt Mortem')
   await page.getByLabel('Project name').fill('E2E billing bot')
   await page.getByLabel('What the app does').fill('Billing support bot. Never promise refunds. Replies under 120 words.')
   await page.getByLabel('Non-negotiable constraints').fill('Never promise refunds outside policy.')

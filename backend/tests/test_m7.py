@@ -28,7 +28,7 @@ def test_export_shape_for_the_golden_project(client, engine):
     r = client.get(f"/projects/{pid}/export/promptfoo")
     assert r.status_code == 200 and "filename=" in r.headers["content-disposition"]
     text = r.text
-    assert text.startswith("# Promptfoo config exported by Prompt Change Validator.") and "promptfoo@latest eval" in text and "--no-cache" in text
+    assert text.startswith("# Promptfoo config exported by Prompt Mortem.") and "promptfoo@latest eval" in text and "--no-cache" in text
     cfg = yaml.safe_load(text)
     assert json.loads(json.dumps(cfg)) == client.get(f"/projects/{pid}/export/promptfoo", params={"format": "json"}).json()["config"]
     with Session(engine) as s:

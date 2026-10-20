@@ -1,4 +1,4 @@
-# Prompt Change Validator
+# Prompt Mortem
 
 You changed a prompt. Did it fix what you wanted, and did it break anything else? This tool answers that without a labelled dataset: agents plan scenarios and metrics (you steer at every step), run the old and new prompt side by side, and report paired, noise-adjusted results scoped to what was actually tested. Optionally it proposes a refined prompt (DSPy GEPA) and validates it on held-out scenarios.
 

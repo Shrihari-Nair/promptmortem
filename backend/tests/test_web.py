@@ -9,7 +9,7 @@ from app.config import settings
 @pytest.fixture
 def dist(tmp_path, monkeypatch):
     (tmp_path / "assets").mkdir()
-    (tmp_path / "index.html").write_text("<!doctype html><title>Prompt Change Validator</title><div id=root></div>")
+    (tmp_path / "index.html").write_text("<!doctype html><title>Prompt Mortem</title><div id=root></div>")
     (tmp_path / "assets" / "app.js").write_text("console.log('hi')")
     monkeypatch.setattr(settings, "static_dir", str(tmp_path))
     return tmp_path
@@ -17,7 +17,7 @@ def dist(tmp_path, monkeypatch):
 
 def test_serves_the_frontend_and_the_api_on_one_port(dist):
     with TestClient(web.build()) as c:  # `with` runs the lifespan: the database is created
-        assert "Prompt Change Validator" in c.get("/").text
+        assert "Prompt Mortem" in c.get("/").text
         assert c.get("/assets/app.js").text == "console.log('hi')"
         assert "root" in c.get("/some/client/route").text  # SPA fallback
         assert c.get("/assets/missing.js").status_code == 404  # missing assets are real 404s

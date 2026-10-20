@@ -51,7 +51,7 @@ function Shell() {
   const logo = (
     <button type="button" onClick={() => setHome(true)} aria-label="Home" className="flex shrink-0 items-center gap-2 rounded-full pr-2 transition-opacity duration-500 hover:opacity-80">
       <img src="/favicon.svg" alt="" width={24} height={24} className="rounded-[7px]" />
-      <span className="hidden text-sm font-semibold tracking-tight lg:inline">Prompt Change Validator</span>
+      <span className="hidden text-sm font-semibold tracking-tight lg:inline">Prompt Mortem</span>
     </button>
   )
   const themeSelect = (

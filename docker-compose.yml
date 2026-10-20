@@ -6,7 +6,7 @@ services:
       context: .
       args:
         EMBEDDINGS: "${EMBEDDINGS:-0}"   # EMBEDDINGS=1 docker compose up --build  for the real embedding model (about 2 GB larger)
-    image: prompt-change-validator
+    image: promptmortem
     ports:
       - "${PORT:-8000}:8000"             # PORT=8123 docker compose up   if 8000 is taken
     env_file:

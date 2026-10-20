@@ -20,7 +20,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="Prompt Change Validator", lifespan=lifespan)
+app = FastAPI(title="Prompt Mortem", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"], allow_methods=["*"], allow_headers=["*"])
 app.include_router(projects.router)
 app.include_router(analysis.router)
