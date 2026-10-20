@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+/* Design tokens. One neutral family, one accent (cobalt), semantic colours ONLY for real state (good / warn / bad).
+   Shape rule: controls (buttons, inputs, badges) use rounded-md; panels and dialogs use rounded-lg; nothing is a pill except status dots. */
+:root {
+  --canvas: #f6f6f7; --surface: #fcfcfd; --sunken: #eeeff1; --ink: #17181c; --muted: #565a63; --line: #dfe1e5; --line-strong: #c6c9cf;
+  --accent: #2f5bbd; --accent-soft: #e7edfa;
+  --good: #1b7648; --good-soft: #e4f2ea; --warn: #8a5600; --warn-soft: #faefd6; --bad: #b0271d; --bad-soft: #fbe6e3;
+  --shadow: 0 1px 2px rgb(23 24 28 / 0.06), 0 6px 18px -8px rgb(47 91 189 / 0.12);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --canvas: #0f1012; --surface: #17181b; --sunken: #1e2024; --ink: #ececee; --muted: #a2a6af; --line: #2b2d33; --line-strong: #3b3e46;
+    --accent: #86a3f2; --accent-soft: #1a2440;
+    --good: #62c692; --good-soft: #112a1d; --warn: #e2b455; --warn-soft: #2e2411; --bad: #f28d83; --bad-soft: #341917;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -10px rgb(0 0 0 / 0.6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --canvas: #0f1012; --surface: #17181b; --sunken: #1e2024; --ink: #ececee; --muted: #a2a6af; --line: #2b2d33; --line-strong: #3b3e46;
+  --accent: #86a3f2; --accent-soft: #1a2440;
+  --good: #62c692; --good-soft: #112a1d; --warn: #e2b455; --warn-soft: #2e2411; --bad: #f28d83; --bad-soft: #341917;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -10px rgb(0 0 0 / 0.6);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", monospace;
+  --color-canvas: var(--canvas); --color-surface: var(--surface); --color-sunken: var(--sunken); --color-ink: var(--ink);
+  --color-muted: var(--muted); --color-line: var(--line); --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent); --color-accent-soft: var(--accent-soft);
+  --color-good: var(--good); --color-good-soft: var(--good-soft); --color-warn: var(--warn); --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad); --color-bad-soft: var(--bad-soft);
+  --shadow-panel: var(--shadow);
+}
+
+@layer base {
+  html { background: var(--canvas); }
+  body { margin: 0; font-family: var(--font-sans); color: var(--ink); background: var(--canvas); font-size: 14px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  h1, h2, h3, h4 { text-wrap: balance; letter-spacing: -0.02em; }
+  p, li { text-wrap: pretty; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  ::selection { background: var(--accent-soft); }
+  table { font-variant-numeric: tabular-nums; }
+  textarea, input, select { font: inherit; color: inherit; }
+  summary { cursor: pointer; }
+}
+.tnum { font-variant-numeric: tabular-nums; }
+.skeleton { border-radius: 6px; background: var(--sunken); }
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton { background: linear-gradient(90deg, var(--sunken) 0%, var(--line) 50%, var(--sunken) 100%); background-size: 200% 100%; animation: shimmer 1.6s ease-in-out infinite; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+  .rise { animation: rise 220ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+}
+@media (prefers-reduced-motion: reduce) { * { transition-duration: 0.01ms !important; animation: none !important; scroll-behavior: auto !important; } }
