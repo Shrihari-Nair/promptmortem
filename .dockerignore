@@ -1,0 +1,23 @@
+# secrets and local state must never enter the build context
+.env
+.env.*
+!.env.example
+**/*.db
+**/*.db-wal
+**/*.db-shm
+# junk and big folders
+.git
+.github
+.claude
+.agents
+**/node_modules
+**/.venv
+**/__pycache__
+**/.pytest_cache
+frontend/dist
+frontend/test-results
+frontend/playwright-report
+frontend/e2e
+backend/tests
+docs
+PLAN.md

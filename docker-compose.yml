@@ -1,0 +1,20 @@
+# One command:  docker compose up --build      then open  http://localhost:8000
+# Put your key in ./.env first (GEMINI_API_KEY=...). It is passed in at run time and never copied into the image.
+services:
+  app:
+    build:
+      context: .
+      args:
+        EMBEDDINGS: "${EMBEDDINGS:-0}"   # EMBEDDINGS=1 docker compose up --build  for the real embedding model (about 2 GB larger)
+    image: prompt-change-validator
+    ports:
+      - "${PORT:-8000}:8000"             # PORT=8123 docker compose up   if 8000 is taken
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - pv-data:/data                    # your projects, scenarios and cached model outputs survive restarts
+    restart: unless-stopped
+
+volumes:
+  pv-data:
