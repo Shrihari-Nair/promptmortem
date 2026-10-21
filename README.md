@@ -6,7 +6,7 @@ You changed a prompt. Did it fix what you wanted, and did it break anything else
 
 [Watch the full two-minute walkthrough (mp4)](docs/media/promptmortem-demo.mp4). It is a real run of the UI against the offline demo models: the old prompt is wordy but safe, the new one is concise but regresses, and Prompt Mortem blocks it and says why.
 
-See `PLAN.md` (intent and design) and `CLAUDE.md` (principles). Per-stage notes are in `docs/`.
+Full project documentation is in [documentation/](documentation/README.md). See also `PLAN.md` (intent and design) and `CLAUDE.md` (principles). Per-stage notes are in `docs/`.
 
 ## Quick start (Docker, one command)
 
