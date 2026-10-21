@@ -8,7 +8,7 @@ import { Notice } from './components/ui/page'
 import { StepContext } from './lib/stepctx'
 import { useTheme, type Theme } from './lib/theme'
 import Budget from './pages/Budget'
-import Home from './pages/Home'
+import Home, { CtaButton } from './pages/Home'
 import Metrics from './pages/Metrics'
 import Refine from './pages/Refine'
 import ReportPage from './pages/Report'
@@ -20,6 +20,8 @@ import { STEPS, type Step } from './steps'
 import type { Project, Stale } from './types'
 
 const qc = new QueryClient()
+/** Steps that end with a "continue" button (Setup saves, Run opens the report, Refine is last). */
+const NEXT: Partial<Record<Step, Step>> = { Understand: 'Scenarios', Scenarios: 'Metrics', Metrics: 'Budget', Budget: 'Run', Report: 'Refine' }
 const KEY = 'pv_project'
 
 function Shell() {
@@ -114,6 +116,12 @@ function Shell() {
           </Notice>
         )}
         <StepContext.Provider value={{ n: String(STEPS.indexOf(step) + 1).padStart(2, '0'), name: step }}><div key={step} className="rise">{page()}</div></StepContext.Provider>
+        {project && NEXT[step] && (
+          <div className="mt-12 flex items-center justify-between gap-4 border-t border-line pt-8">
+            <p className="hidden text-[13px] text-muted sm:block">Done here? Your edits are saved.</p>
+            <CtaButton onClick={() => go(NEXT[step]!)}>Continue to {NEXT[step]}</CtaButton>
+          </div>
+        )}
         </>)}
       </main>
     </div>

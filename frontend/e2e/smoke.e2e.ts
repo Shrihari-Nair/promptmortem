@@ -47,7 +47,7 @@ test('the whole wizard works in a browser: setup to refine', async ({ page, requ
   await shot('2-understand')
 
   // 3. Scenarios: generate, heatmap, approve, reject a whole cluster with a comment
-  await step('Scenarios').click()
+  await page.getByRole('button', { name: 'Continue to Scenarios' }).click()  // the bottom-of-page button moves on to the next step
   await page.getByRole('button', { name: 'Generate scenario plan' }).click()
   await expect(page.getByText('Unreviewed', { exact: true })).toBeVisible()
   const cells = page.locator('button[title*="#"]')
