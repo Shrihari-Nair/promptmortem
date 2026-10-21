@@ -214,3 +214,33 @@ def test_unlabelled_traces_do_not_count_as_labelled_data(client, engine):
     prov, _ = scripted(lambda p: {"verdict": "pass", "score": 1, "rationale": "r"})
     res = asyncio.run(metric_plan.calibrate(engine, LLMClient(engine, provider=prov), m["id"]))
     assert res["n_labeled"] == 1  # only the one trace that carries a label
+
+
+def _labelled_judge_project(client):
+    pid = make_project(client)["id"]
+    lines = [{"input": f"good{i}", "output": f"fine reply {i}", "expected": "pass"} for i in range(4)] + [{"input": f"bad{i}", "output": f"bad reply {i}", "expected": "fail"} for i in range(2)]
+    client.post(f"/projects/{pid}/traces/import", json={"format": "jsonl", "content": "\n".join(json.dumps(l) for l in lines)})
+    return client.post(f"/projects/{pid}/metrics", json={"name": "j", "kind": "llm_judge", "judge_model": "x/m",
+                                                         "definition": {"rubric": "Pass if helpful.", "pass_examples": ["yes"], "fail_examples": ["no"]}}).json()["id"]
+
+
+def test_calibration_reports_chance_corrected_kappa(client, engine):
+    mid = _labelled_judge_project(client)
+    prov, _ = scripted(lambda p: {"verdict": "pass", "score": 1, "rationale": "r"})  # says pass to everything: 4/6 raw agreement
+    res = asyncio.run(metric_plan.calibrate(engine, LLMClient(engine, provider=prov), mid))
+    assert res["agreement"] == pytest.approx(4 / 6) and res["kappa"] == pytest.approx(0.0)  # ...but no skill at all
+
+
+def test_compare_judge_versions_scores_each_prompt_file_against_labels(client, engine, tmp_path, monkeypatch):
+    from app.agents import base
+
+    mid = _labelled_judge_project(client)
+    base_text = (base.PROMPTS / "judge.v1.md").read_text()
+    (tmp_path / "judge.v1.md").write_text(base_text)
+    (tmp_path / "judge.v2.md").write_text(base_text + "\nSTRICT-V2\n")
+    monkeypatch.setattr(base, "PROMPTS", tmp_path)
+    # v1 passes everything; v2 (marked prompt) fails anything whose output says "bad"
+    prov, _ = scripted(lambda p: {"verdict": "fail" if "STRICT-V2" in p and "bad reply" in p else "pass", "score": 0, "rationale": "r"})
+    out = asyncio.run(metric_plan.compare_judge_versions(engine, LLMClient(engine, provider=prov), mid, ["v1", "v2"]))
+    assert out["v1"]["agreement"] == pytest.approx(4 / 6) and out["v1"]["kappa"] == pytest.approx(0.0)
+    assert out["v2"]["agreement"] == 1.0 and out["v2"]["kappa"] == pytest.approx(1.0)

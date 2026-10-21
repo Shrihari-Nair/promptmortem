@@ -128,6 +128,17 @@ def combine(verdicts: Sequence[str]) -> str:
     return "untested"
 
 
+def cohen_kappa(a: Sequence[str], b: Sequence[str]) -> float | None:
+    """Chance-corrected agreement of two label sequences (judge vs human). None when chance agreement is already 1
+    (one label only), where kappa is undefined. Raw agreement flatters a judge that just says 'pass' on a pass-heavy set."""
+    n = len(a)
+    if n == 0:
+        return None
+    po = sum(x == y for x, y in zip(a, b)) / n
+    pe = sum((a.count(c) / n) * (b.count(c) / n) for c in set(a) | set(b))
+    return None if pe >= 1 else (po - pe) / (1 - pe)
+
+
 def mcnemar_exact(old_pass: Sequence[bool], new_pass: Sequence[bool]) -> dict:
     """Exact McNemar on paired binary outcomes. b = pass->fail (broken), c = fail->pass (fixed)."""
     b = sum(o and not n for o, n in zip(old_pass, new_pass))

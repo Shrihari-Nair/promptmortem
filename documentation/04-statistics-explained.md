@@ -86,6 +86,9 @@ Every report states what it covers, because a result is only as good as the test
 - noise per metric (old against old)
 - the per-case detection threshold, and a note when repeats are too few to detect a change
 - judge calls skipped, and the metrics judged by a cheaper model
+- the judge model(s) that scored the run (`judge_models`), so a silently swapped judge cannot change scores unnoticed
+
+The report's judge-reliability block also gives calibration agreement as **Cohen's kappa** next to raw agreement. Kappa subtracts the agreement a judge would reach by chance, so a judge that says "pass" to everything scores 0 even when most of your labels are passes.
 
 ## Limits to keep in mind
 

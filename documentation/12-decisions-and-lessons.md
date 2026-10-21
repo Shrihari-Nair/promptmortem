@@ -59,9 +59,18 @@ Each of these was found by running against real Gemini and fixed.
 - **DSPy pin:** `LLMClientLM` uses an API that DSPy 3.5 removes, so DSPy stays pinned below 3.5.
 - **Promptfoo export:** `language_is` cannot be exported, and Python-only regex syntax may differ in JavaScript. The export header lists these as warnings.
 
+## Harness decisions
+
+- **A cassette is the cache.** The cache table already stores everything a replay needs, so recording is a JSON dump and replay is seeding the cache. No new storage format.
+- **Real output in tests.** The fake model returns perfectly valid JSON, so real-model failure shapes (fences, truncation, refusals) are covered by fault injection and by a recorded Gemini cassette.
+- **Error rates are pinned.** The nightly sweep fails if power falls, false alarms rise or spend passes the high estimate, so a change to the statistics code cannot quietly make the verdicts worse.
+- **Kappa next to agreement.** Raw agreement flatters a judge that agrees by default; kappa does not.
+- **Seeded loops, not Hypothesis.** The property tests use stdlib `random` with fixed seeds to avoid a new dependency; the cost is no automatic shrinking of a failing case.
+
 ## Ideas that were deliberately left out
 
 - Multi-turn conversations, tool calling and agent traces.
 - User accounts and sharing.
 - A hosted version.
 - Running arbitrary custom code as a metric.
+- Claude Code hooks and a milestone acceptance checklist for the development process (proposed as harness item 9, not built).

@@ -23,9 +23,10 @@ CLUSTERS = [  # name, category, tags, severity, message template
 ]
 
 
-def seed_golden(engine: Engine, variant: str = "planted", noise: float = 0.05, n_each: int = 20) -> str:
-    old = TEMPLATE.format(params=json.dumps({**OLD, "noise": noise}))
-    new = (TEMPLATE if variant == "planted" else NOOP_TEMPLATE).format(params=json.dumps({**(NEW if variant == "planted" else OLD), "noise": noise}))
+def seed_golden(engine: Engine, variant: str = "planted", noise: float = 0.05, n_each: int = 20, salt: str = "") -> str:
+    """`salt` is appended to both prompts: behaviour is identical, but the seeded randomness is independent (a replicate)."""
+    old = TEMPLATE.format(params=json.dumps({**OLD, "noise": noise})) + salt
+    new = (TEMPLATE if variant == "planted" else NOOP_TEMPLATE).format(params=json.dumps({**(NEW if variant == "planted" else OLD), "noise": noise})) + salt
     with Session(engine) as s:
         p = Project(name=f"golden-{variant}", app_description="Billing support bot", target_model="fake/app", judge_model_default="fake/judge")
         s.add(p)

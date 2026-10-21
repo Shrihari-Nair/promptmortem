@@ -2,6 +2,7 @@
 import hashlib
 import json
 import time
+from contextvars import ContextVar
 from pathlib import Path
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
@@ -13,6 +14,9 @@ from sqlmodel import Session, select
 from app.core.models import LLMCall
 
 load_dotenv(Path(__file__).resolve().parents[3] / ".env")  # the project-root .env (git-ignored), wherever the server is started from
+
+
+current_run: ContextVar[str | None] = ContextVar("current_run", default=None)  # set by the runner; tags paid calls
 
 
 class BudgetExceeded(Exception):
@@ -79,6 +83,7 @@ class LLMClient:
         seed: int = 0,
         repeat_idx: int = 0,
         budget: Budget | None = None,
+        tag: str | None = None,
         **params,
     ) -> LLMResult:
         params = {"temperature": temperature, **params}
@@ -98,7 +103,7 @@ class LLMClient:
         latency = time.perf_counter() - t0
         with Session(self.engine) as s:
             s.add(LLMCall(cache_key=key, model=model, response=text, tokens_in=tin,
-                          tokens_out=tout, cost=cost, latency=latency))
+                          tokens_out=tout, cost=cost, latency=latency, run_id=current_run.get(), tag=tag))
             s.commit()
         if budget:
             budget.spent += cost

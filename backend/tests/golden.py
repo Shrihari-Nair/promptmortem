@@ -5,8 +5,8 @@ from app.benchmark.golden import seed_golden
 from tests.conftest import wait_job
 
 
-def golden(client, engine, variant="planted", noise=0.05, n_each=20, cap=50.0, levers=None, tier="full"):
-    pid = seed_golden(engine, variant, noise, n_each)
+def golden(client, engine, variant="planted", noise=0.05, n_each=20, cap=50.0, levers=None, tier="full", salt=""):
+    pid = seed_golden(engine, variant, noise, n_each, salt)
     r = client.post(f"/projects/{pid}/plan/estimate", json={"levers": levers} if levers else None)
     assert r.status_code == 200, r.text
     c = client.post(f"/projects/{pid}/plan/confirm", json={"tier": tier, "cap": cap, **({"levers": levers} if levers else {})})

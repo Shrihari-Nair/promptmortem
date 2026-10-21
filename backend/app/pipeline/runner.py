@@ -17,7 +17,7 @@ from app.agents import scenario_generator
 from app.agents.base import AgentError
 from app.config import settings
 from app.core import events
-from app.core.llm import Budget, BudgetExceeded, LLMClient
+from app.core.llm import Budget, BudgetExceeded, LLMClient, current_run
 from app.core.secrets import redact
 from app.core.models import Job, Metric, Optimization, Plan, Project, PromptVersion, Run, RunResult, Scenario, Score
 from app.pipeline import verdicts as V
@@ -537,6 +537,7 @@ def _finish(ctx: RunCtx, status: str, **kw) -> None:
 
 async def execute_run(engine: Engine, client: LLMClient, run_id: str) -> dict:
     ctx = load_ctx(engine, client, run_id)
+    current_run.set(run_id)
     events.reset(run_id)
     _controls[run_id] = ctx
     with Session(engine) as s:

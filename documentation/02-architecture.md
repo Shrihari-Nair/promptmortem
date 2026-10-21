@@ -106,4 +106,4 @@ In Docker the command is `uvicorn app.web:app`. In development you can run `app.
 
 - The database file is `workspace.db` by default, or the path in `PV_DB_URL`. In Docker it is `/data/workspace.db` on the `pv-data` volume.
 - On startup `init_db` creates missing tables and adds any missing columns. It does not rename or drop columns, which would need a real migration.
-- The model-call cache lives in the same database (`LLMCall` table), keyed by a hash of the model, messages, parameters, seed and repeat index.
+- The model-call cache lives in the same database (`LLMCall` table), keyed by a hash of the model, messages, parameters, seed and repeat index. Each paid call also records the run that paid for it (`run_id`) and a `tag` (the agent name, or `target` for the application under test); `GET /runs/{id}/trace` sums these per agent. `app/core/cassette.py` dumps and reloads these rows as a JSON "cassette" (see [10](10-testing-and-demo.md)).

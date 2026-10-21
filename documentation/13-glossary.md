@@ -16,7 +16,11 @@
 
 **Calibration.** Measuring how well a judge agrees with your own pass and fail labels.
 
+**Cassette.** A JSON dump of recorded model calls (the `LLMCall` rows). Loaded into the cache it lets a test replay real model output with no network and no cost.
+
 **Cap (hard cap).** The most you allow a run to spend. At the cap, the run pauses and asks.
+
+**Cohen's kappa.** Agreement between a judge and your labels after subtracting the agreement expected by chance. 1 is perfect, 0 is no better than guessing.
 
 **Cluster.** A group of similar scenarios. Rejecting one case can reject its cluster.
 
@@ -34,6 +38,8 @@
 
 **Fake model.** A deterministic offline stand-in for a real model (any name starting with `fake/`). Used in tests and demos.
 
+**Fault injection.** Making a fake model misbehave on purpose (garbage or truncated JSON, timeouts) to check the tool copes.
+
 **Feedback.** Every approve, reject, edit, comment or override you make. Stored and fed back into the agents.
 
 **GEPA.** A reflective prompt-optimization method (from DSPy) used in the Refine step.
@@ -47,6 +53,8 @@
 **Job.** A background task with a status and progress text. The browser polls it.
 
 **Levers.** Switches that reduce cost: programmatic first, cheap judge for easy rubrics, adaptive repeats, early stopping.
+
+**Nightly sweep.** The golden benchmark run over several noise levels and replicates, compared to a committed baseline of error rates.
 
 **LiteLLM.** The library that gives one interface to many model providers.
 

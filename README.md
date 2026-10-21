@@ -61,7 +61,8 @@ Details and measured error rates: `docs/stage6-report.md`.
 ## Tests
 
 ```bash
-cd backend && uv run pytest                                  # ~110 tests, fake LLM, no key
+cd backend && uv run pytest                                  # ~170 tests, fake LLM, no key
+PV_SWEEP=1 uv run pytest tests/test_benchmark_sweep.py        # nightly benchmark sweep vs tests/benchmark_baseline.json (about 1 minute)
 PROMPTFOO_BIN=/path/to/promptfoo uv run pytest tests/test_m7.py   # also verifies the Promptfoo export against the real tool
 cd frontend && npm test && npm run build                     # unit test + type-check
 cd frontend && npx playwright install chromium && npm run e2e     # full wizard in a real browser (uses ports 8000 and 5174)

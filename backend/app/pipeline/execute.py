@@ -53,4 +53,4 @@ def render_prompt(text: str, inp: dict) -> str:
 async def run_target(client: LLMClient, model: str, prompt_text: str, inp: dict, *, repeat_idx: int = 0,
                      budget: Budget | None = None) -> LLMResult:
     return await client.complete(model, [{"role": "user", "content": render_prompt(prompt_text, inp)}],
-                                 temperature=settings.target_temperature, repeat_idx=repeat_idx, budget=budget, **reasoning.for_target(model))
+                                 temperature=settings.target_temperature, repeat_idx=repeat_idx, budget=budget, tag="target", **reasoning.for_target(model))

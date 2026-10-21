@@ -15,6 +15,7 @@ from app.pipeline.execute import fill_optional, project_optional, run_target
 from app.pipeline.feedback import metric_feedback_text
 from app.pipeline.metrics_engine import metric_applies, run_programmatic
 from app.pipeline.planner import Ctx, PlanError
+from app.pipeline.verdicts import cohen_kappa
 
 MAX_METRICS = 12
 def regression_spec(ctx: "Ctx") -> MetricSpec:
@@ -186,11 +187,8 @@ async def preview(engine: Engine, client: LLMClient, metric_id: str, samples: li
     return list(await asyncio.gather(*(one(sm) for sm in samples)))
 
 
-async def calibrate(engine: Engine, client: LLMClient, metric_id: str) -> dict:
-    """Agreement between a pointwise judge and YOUR labels. Only explicit labels count: a trace (or dataset row) with an observed
-    `output` and `expected` = pass | fail. Free-text `expected` values are NOT assumed to be gold replies (they are often descriptions
-    of the wanted behaviour, which no judge could 'pass' as a reply) and are used as expected behaviour instead.
-    The labels should be about what the rubric checks: calibrate a metric on labels that match it."""
+def _calibration_set(engine: Engine, metric_id: str) -> tuple[Metric, str, list[dict]]:
+    """(metric, judge model, labelled items) for a pointwise judge metric; see `calibrate` for what counts as a label."""
     with Session(engine) as s:
         m = s.get(Metric, metric_id)
         if not m or m.kind != "llm_judge" or is_pairwise(m):
@@ -205,15 +203,37 @@ async def calibrate(engine: Engine, client: LLMClient, metric_id: str) -> dict:
         items = items[: settings.calibration_max_items]
         if not items:
             raise PlanError("no labelled examples to calibrate against: import traces with an observed `output` and `expected` set to pass or fail")
-        default = p.judge_model_default
+        return m, p.judge_model_default, items
+
+
+async def compare_judge_versions(engine: Engine, client: LLMClient, metric_id: str, versions: list[str]) -> dict:
+    """Dogfooding the judge prompt: score each versioned judge prompt file (agents/prompts/judge.<version>.md) against YOUR
+    labels. A new judge version should beat the current one on kappa before it replaces it."""
+    m, default, items = _calibration_set(engine, metric_id)
+    d, model, out = JudgeDef.model_validate(m.definition), m.judge_model or default, {}
+    for ver in versions:
+        res = await asyncio.gather(*(judge_agent.judge(client, model, d, i["input"], i["output"], version=ver) for i in items))
+        got, want = [r.verdict for r in res], [i["label"] for i in items]
+        out[ver] = {"n": len(items), "agreement": sum(a == b for a, b in zip(got, want)) / len(items), "kappa": cohen_kappa(want, got)}
+    return out
+
+
+async def calibrate(engine: Engine, client: LLMClient, metric_id: str) -> dict:
+    """Agreement between a pointwise judge and YOUR labels. Only explicit labels count: a trace (or dataset row) with an observed
+    `output` and `expected` = pass | fail. Free-text `expected` values are NOT assumed to be gold replies (they are often descriptions
+    of the wanted behaviour, which no judge could 'pass' as a reply) and are used as expected behaviour instead.
+    The labels should be about what the rubric checks: calibrate a metric on labels that match it."""
+    m, default, items = _calibration_set(engine, metric_id)
     res = await asyncio.gather(*(evaluate(client, default, m, inp=i["input"], output=i["output"]) for i in items))
     rows = [{**i, "judge": r["verdict"], "agree": r["verdict"] == i["label"], "rationale": r["rationale"]} for i, r in zip(items, res)]
     agreement = sum(r["agree"] for r in rows) / len(rows)
+    kappa = cohen_kappa([r["label"] for r in rows], [r["judge"] for r in rows])
     with Session(engine) as s:
         cal = s.exec(select(Calibration).where(Calibration.metric_id == metric_id)).first() or Calibration(project_id=m.project_id, metric_id=metric_id)
         cal.n_labeled, cal.agreement = len(rows), agreement
-        cal.details = {"disagreements": [r for r in rows if not r["agree"]][:10],
+        cal.details = {"kappa": kappa,
+                       "disagreements": [r for r in rows if not r["agree"]][:10],
                        "by_label": {lab: {"n": sum(r["label"] == lab for r in rows), "agree": sum(r["label"] == lab and r["agree"] for r in rows)} for lab in ("pass", "fail")}}
         s.add(cal)
         s.commit()
-    return {"n_labeled": len(rows), "agreement": agreement}
+    return {"n_labeled": len(rows), "agreement": agreement, "kappa": kappa}

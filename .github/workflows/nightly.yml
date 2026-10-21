@@ -1,0 +1,13 @@
+name: nightly
+on:
+  schedule: [{ cron: "17 3 * * *" }]
+  workflow_dispatch:
+jobs:
+  sweep:   # golden benchmark over noise levels and replicates vs backend/tests/benchmark_baseline.json (fake LLM, no key)
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: backend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync
+      - run: PV_SWEEP=1 uv run pytest tests/test_benchmark_sweep.py -q

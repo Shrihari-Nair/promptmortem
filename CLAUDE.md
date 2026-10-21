@@ -28,7 +28,8 @@ Python 3.11, FastAPI, SQLModel/SQLite, LiteLLM (all LLM calls through `LLMClient
 
 ## Commands (fill in as built)
 - Backend (from `backend/`): `uv sync`, then `uv run uvicorn app.main:app --reload`
-- Tests (from `backend/`): `uv run pytest`
+- Tests (from `backend/`): `uv run pytest`; nightly sweep: `PV_SWEEP=1 uv run pytest tests/test_benchmark_sweep.py` (`PV_SWEEP_UPDATE=1` rewrites the baseline, review the diff)
+- Record a cassette after a real run: `python -m app.core.cassette dump tests/cassettes/NAME.json gemini/`; compare judge prompt versions: `python ../scripts/judge_version_eval.py METRIC_ID v1 v2`
 - Frontend (from `frontend/`): `npm run dev` (proxies `/api` to :8000), `npm test`, `npm run build`
 - Real-model smoke (server running): `python scripts/pipeline_smoke.py --model gemini/gemini-2.5-flash --cap 0.50` (`--model fake/app` = dry run)
 - Browser smoke: `cd frontend && npm run e2e` (needs `npx playwright install chromium`); Promptfoo parity: `PROMPTFOO_BIN=... uv run pytest tests/test_m7.py`

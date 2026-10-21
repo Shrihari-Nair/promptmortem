@@ -1,0 +1,8 @@
+{
+ "cost_spent_over_high_estimate_max": 0.954,
+ "noop_case_false_flag_rate": 0.0,
+ "noop_run_not_ok_rate": 0.0,
+ "planted_detect_rate": 1.0,
+ "planted_fix_found_rate": 1.0,
+ "runs": 18
+}

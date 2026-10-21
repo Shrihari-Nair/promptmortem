@@ -34,7 +34,7 @@ Tables are defined in `backend/app/core/models.py` with SQLModel. IDs are short 
 ### Plumbing
 | Table | Holds |
 |-------|-------|
-| `LLMCall` | the model-call cache: key (hash), model, response, tokens, cost, latency. This is also the cost ledger. |
+| `LLMCall` | the model-call cache: key (hash), model, response, tokens, cost, latency, plus `run_id` (the run that paid) and `tag` (agent name or `target`). This is also the cost ledger. |
 | `Job` | a background job: kind, status, progress text, result, error |
 | `Optimization` | a step 8 search: status, config (cap, split ids), result (scores, candidates, reflection log), spend, error |
 
@@ -121,6 +121,7 @@ All paths are under `/api` when served by `app.web` (the Vite dev server proxies
 | `POST /runs/{rid}/stop` | stop and report partial |
 | `GET /runs/{rid}/events` | live Server-Sent Events |
 | `GET /runs/{rid}/report` | the report (rebuilt each time) |
+| `GET /runs/{rid}/trace` | paid model calls and cost for this run, per agent (`target`, `judge`, `pairwise_judge`, ...). Cache hits are not logged, so a resumed run shows only what it paid for itself |
 | `POST /reports/{rep_id}/verdict-override` | override a case verdict |
 | `POST /reports/{rep_id}/rescore` | re-score with current metrics |
 | `GET /reports/{rep_id}/export` | export (`format=md` or `json`) |

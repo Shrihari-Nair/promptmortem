@@ -176,11 +176,20 @@ def analyze(s: Session, run_id: str) -> dict:
              "coverage_lost": (cfg.get("coverage_lost") or {}).get("categories", {}), "clusters_dropped": (cfg.get("coverage_lost") or {}).get("clusters_dropped", []),
              "complete": done, "run_status": run.status}
 
+    # which judge models produced the judged scores (a silent judge swap changes scores with no change to the prompts)
+    judged = [m for m in metrics if m.kind == "llm_judge"]
+    jm = {s.get(Project, plan.project_id).judge_model_default} | {m.judge_model for m in judged if m.judge_model}
+    jm |= {(m.definition or {}).get("ensemble_model") or settings.judge_ensemble_model for m in judged if (m.definition or {}).get("ensemble")}
+    scope["judge_models"] = sorted(x for x in jm if x) if judged else []
+
     # judge reliability
     pair_j = sum(len(c.data[sid][mid]["pair"]) for sid in tested for mid in pair_ids if mid in c.data.get(sid, {}))
     pair_d = sum(1 for sid in tested for mid in pair_ids if mid in c.data.get(sid, {}) for _, dsp in c.data[sid][mid]["pair"].values() if dsp)
-    cals = [x.agreement for x in s.exec(select(Calibration).where(Calibration.project_id == plan.project_id)).all() if x.agreement is not None]
+    cal_rows = s.exec(select(Calibration).where(Calibration.project_id == plan.project_id)).all()
+    cals = [x.agreement for x in cal_rows if x.agreement is not None]
+    kappas = [x.details["kappa"] for x in cal_rows if x.details and x.details.get("kappa") is not None]
     reliability = {"calibration_agreement": _pct(sum(cals) / len(cals)) if cals else None,
+                   "calibration_kappa": round(sum(kappas) / len(kappas), 3) if kappas else None,
                    "pairwise_disagreement_rate": _pct(pair_d / pair_j) if pair_j else None, "pairwise_judgments": pair_j}
 
     ens = [sc for sc in c.scores.values() if sc.details and "second_judge" in sc.details]
@@ -352,7 +361,8 @@ def to_markdown(rep: dict) -> str:
     L += ["", "## Per category", "", "| category | fixed | broken | unchanged | inconclusive |", "|---|---|---|---|---|"]
     L += [f"| {g['name']} | {g['fixed']} | {g['broken']} | {g['unchanged']} | {g['inconclusive']} |" for g in rep["per_category"]]
     j, cst = rep["judge_reliability"], rep["cost"]
-    L += ["", "## Judge reliability", "", f"- Calibration agreement with your labels: {j['calibration_agreement']}",
+    L += ["", "## Judge reliability", "", f"- Calibration agreement with your labels: {j['calibration_agreement']} (Cohen's kappa, chance-corrected: {j.get('calibration_kappa')})",
+          f"- Judge model(s): {', '.join(sc.get('judge_models') or []) or 'none or not recorded'}",
           f"- Pairwise A/B disagreement rate: {j['pairwise_disagreement_rate']} over {j['pairwise_judgments']} judgments", "",
           "## Cost", "", f"- Estimated {cst['estimated']}, spent {cst['spent']}, cap {cst['cap']}"]
     return "\n".join(L) + "\n"

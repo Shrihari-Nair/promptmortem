@@ -34,7 +34,7 @@ async def run_agent[T: BaseModel](client: LLMClient, model: str, agent: str, var
     messages = [{"role": "user", "content": render(agent, variables, version)}]
     for _ in range(MAX_REPAIRS + 1):
         r = await client.complete(model, messages, temperature=temperature, seed=seed,
-                                  response_format={"type": "json_object"}, budget=budget, **(extra or {}))
+                                  response_format={"type": "json_object"}, budget=budget, tag=agent, **(extra or {}))
         try:
             return out.model_validate(extract_json(r.text))
         except (ValueError, ValidationError) as e:  # JSONDecodeError is a ValueError

@@ -9,12 +9,12 @@ from app.core.llm import Budget, LLMClient
 
 
 async def judge(client: LLMClient, model: str, d: JudgeDef, inp: dict, output: str, *, repeat_idx: int = 0,
-                budget: Budget | None = None) -> JudgeOut:
+                budget: Budget | None = None, version: str = "v1") -> JudgeOut:
     return await run_agent(client, model, "judge", {
         "rubric": d.rubric, "pass_examples": d.pass_examples, "fail_examples": d.fail_examples,
         "scale": "binary: score 1 = pass, 0 = fail" if d.output == "binary" else "1 (worst) to 5 (best); verdict pass if >= 4",
         "input": inp, "output": output,
-    }, JudgeOut, temperature=settings.judge_temperature, seed=repeat_idx, budget=budget, extra=reasoning.for_judge(model))
+    }, JudgeOut, temperature=settings.judge_temperature, seed=repeat_idx, budget=budget, version=version, extra=reasoning.for_judge(model))
 
 
 @dataclass

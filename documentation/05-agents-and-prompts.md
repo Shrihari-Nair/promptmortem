@@ -47,7 +47,8 @@ Validators enforce the important rules in code, for example "a judge metric must
 - **Code first.** A pointwise judge is skipped on any output that already failed a programmatic check (the `programmatic_first` lever). That pair is dropped from that metric rather than counted, and the report says how many calls were skipped.
 - **Cached.** Judge calls are cached by content, so re-scoring identical outputs costs nothing.
 - **Thinking off.** Judges run with the provider's hidden reasoning disabled where possible. This cut a judge call from 350 output tokens to 32 with the same verdict on Gemini 2.5.
-- **Calibration.** You can measure a judge against your own pass/fail labels. A lenient judge shows up as low agreement on the `fail` label.
+- **Calibration.** You can measure a judge against your own pass/fail labels. A lenient judge shows up as low agreement on the `fail` label, and as a kappa near 0 (kappa is stored with the calibration and shown in the report).
+- **Judge prompt versions.** Judge prompts are versioned files (`judge.v1.md`). To try a new one, add `judge.v2.md` and run `scripts/judge_version_eval.py METRIC_ID v1 v2`: it scores each version against your labelled traces (agreement and kappa), so a new judge prompt has to beat the current one before it replaces it.
 - **Verbosity bias guard.** The regression judge is built from the app's constraints and the intended changes, and is told not to reward length or polish. On real Gemini an unprimed judge rated 18 compliant, concise replies as regressions, which would have blocked a good change.
 - **Optional second judge.** A rubric can opt in to a second, different model. Disagreements are stored and shown, but the primary verdict stands.
 

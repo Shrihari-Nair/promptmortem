@@ -100,5 +100,32 @@ def test_report_scope_stamp_is_complete(client, engine):  # principle 5: every r
     rid, j = run_to_end(client, pid)
     assert j["result"]["status"] == "done", j
     scope = client.get(f"/runs/{rid}/report").json()["summary"]["scope"]
-    need = {"tier", "tested", "untested_in_tier", "reviewed_share", "verified_share", "noise_band", "complete", "coverage_lost"}
+    need = {"judge_models", "tier", "tested", "untested_in_tier", "reviewed_share", "verified_share", "noise_band", "complete", "coverage_lost"}
     assert need <= set(scope), need - set(scope)
+
+
+# ---- real Gemini output (recorded by scripts/pipeline_smoke.py + `python -m app.core.cassette dump`) ----
+def test_real_gemini_judge_outputs_parse():
+    from app.agents.base import extract_json
+    from app.agents.schemas import PairOut
+    path = Path(__file__).parent / "cassettes" / "billing_gemini.json"
+    seen = {"verdict": 0, "winner": 0}
+    for c in __import__("json").loads(path.read_text())["calls"]:
+        for key, schema in (("verdict", JudgeOut), ("winner", PairOut)):
+            if f'"{key}"' in c["response"]:
+                schema.model_validate(extract_json(c["response"]))  # what run_agent would accept
+                seen[key] += 1
+    assert all(seen.values()), seen  # the cassette really contains both judge kinds
+
+
+# ---- run tagging and trace ----
+def test_run_trace_attributes_paid_calls_to_the_run_and_agent(client, engine):
+    pid = golden(client, engine, "noop", n_each=5)
+    rid, j = run_to_end(client, pid)
+    assert j["result"]["status"] == "done", j
+    t = client.get(f"/runs/{rid}/trace").json()
+    assert t["calls"] > 0 and "target" in t["by_tag"] and "(untagged)" not in t["by_tag"], t["by_tag"].keys()
+    assert t["cost"] == pytest.approx(sum(x["cost"] for x in t["by_tag"].values()))
+    with Session(engine) as s:  # the run's own cost log never exceeds what the run says it spent
+        assert t["cost"] <= s.get(__import__("app.core.models", fromlist=["Run"]).Run, rid).spent + 1e-9
+    assert client.get("/runs/nope/trace").status_code == 404

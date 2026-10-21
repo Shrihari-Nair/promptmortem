@@ -75,4 +75,4 @@ All settings are in `backend/app/config.py`. Override any of them with an enviro
 
 ## Continuous integration
 
-`.github/workflows/ci.yml` has four jobs: the secret scan, the backend tests, the frontend build and unit tests, and the browser end-to-end test. See [10](10-testing-and-demo.md).
+`.github/workflows/ci.yml` has four jobs: the secret scan, the backend tests, the frontend build and unit tests, and the browser end-to-end test. See [10](10-testing-and-demo.md). A separate `.github/workflows/nightly.yml` runs the benchmark sweep once a day (and on demand) against the committed baseline.
