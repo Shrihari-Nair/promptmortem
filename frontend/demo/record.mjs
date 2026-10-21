@@ -1,6 +1,7 @@
 // Records an end-to-end walkthrough of the real UI (video + captions) against a running Prompt Mortem.
 // Usage: BASE_URL=http://localhost:8000 OUT=./demo-out node demo/record.mjs
-// Uses the offline fake models, so it is free and deterministic: the old prompt is wordy but safe, the new one is concise but over-promises refunds.
+// Default: the offline fake models (free, deterministic; the old prompt is wordy but safe, the new one is concise but over-promises refunds).
+// DEMO_MODE=real: the server's real default models (needs a key in .env; costs a little, see the caps below) and the unmodified example prompts.
 import { chromium } from 'playwright'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -9,9 +10,10 @@ import { dirname, join } from 'node:path'
 const BASE = process.env.BASE_URL ?? 'http://localhost:8000'
 const OUT = process.env.OUT ?? './demo-out'
 const EX = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'examples', 'billing_bot')
+const REAL = process.env.DEMO_MODE === 'real'
 const D = (o) => `<!-- fake-app: ${JSON.stringify(o)} -->`
-const OLD = readFileSync(join(EX, 'old_prompt.txt'), 'utf8').trim() + `\n${D({ verbose_on_explain: true, overpromise: 0.0, noise: 0.03 })}`
-const NEW = readFileSync(join(EX, 'new_prompt.txt'), 'utf8').trim() + `\n${D({ verbose_on_explain: false, overpromise: 0.9, noise: 0.03 })}`
+const OLD = readFileSync(join(EX, 'old_prompt.txt'), 'utf8').trim() + (REAL ? '' : `\n${D({ verbose_on_explain: true, overpromise: 0.0, noise: 0.03 })}`)
+const NEW = readFileSync(join(EX, 'new_prompt.txt'), 'utf8').trim() + (REAL ? '' : `\n${D({ verbose_on_explain: false, overpromise: 0.9, noise: 0.03 })}`)
 
 const browser = await chromium.launch()
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, colorScheme: 'dark', recordVideo: { dir: OUT, size: { width: 1280, height: 720 } } })
@@ -38,6 +40,7 @@ await ctx.addInitScript(() => {
 const T0 = Date.now()
 const segs = []  // [start, end] seconds of dead time (model calls); post-production plays these faster
 const page = await ctx.newPage()
+page.setDefaultTimeout(REAL ? 900_000 : 30_000)
 const wait = (ms) => page.waitForTimeout(ms)
 const fast = async (fn) => { const a = (Date.now() - T0) / 1000; await fn(); const b = (Date.now() - T0) / 1000; if (b - a > 2.5) segs.push([+(a + 0.8).toFixed(2), +b.toFixed(2)]) }
 const PACE = 1.15  // < 1 shortens every caption hold
@@ -80,8 +83,10 @@ await click(page.getByRole('button', { name: 'Start validating' }).first())
 await say('01 Setup', 'Describe the app. Paste the old and the new prompt.', 1800)
 await type(page.getByLabel('Project name'), 'Acme billing bot', 55)
 await type(page.getByLabel('What the app does'), 'Customer support bot for a SaaS billing product. Replies under 120 words.', 22)
-await type(page.getByLabel('Non-negotiable constraints'), 'Never promise a refund outside policy.', 28)
-await fill(page.getByLabel('Target model'), 'fake/app'); await fill(page.getByLabel('Judge and agent model'), 'fake/judge')
+await type(page.getByLabel('Non-negotiable constraints'), 'Never reveal policy IDs like POL-1234. Always reply in the customer\u2019s language. Never guarantee a refund.', 22)
+if (!REAL) { await fill(page.getByLabel('Target model'), 'fake/app'); await fill(page.getByLabel('Judge and agent model'), 'fake/judge') }
+else await show(page.getByLabel('Target model'), 1200)
+if (REAL) await say('01 Setup', 'This run uses real Gemini (gemini-2.5-flash) with a small hard cap.', 2800)
 await fill(page.getByLabel('Old prompt', { exact: true }), OLD)
 await fill(page.getByLabel('New prompt', { exact: true }), NEW)
 await show(page.getByLabel('{{user_message}}'), 1400)
@@ -122,8 +127,8 @@ await click(page.getByRole('button', { name: 'Estimate cost' }))
 await fast(() => page.getByRole('columnheader', { name: 'Coverage lost' }).waitFor()); await wait(500)
 await show(page.getByRole('columnheader', { name: 'Coverage lost' }), 600)
 await say('05 Budget', 'Cost is estimated after planning. Every tier shows the coverage it gives up.', 3400)
-await click(page.getByRole('radio', { name: 'Balanced tier' }))
-await click(page.getByRole('button', { name: /^Confirm balanced plan/ }))
+await click(page.getByRole('radio', { name: REAL ? 'Lean tier' : 'Balanced tier' }))
+await click(page.getByRole('button', { name: REAL ? /^Confirm lean plan/ : /^Confirm balanced plan/ }))
 await fast(() => page.getByText(/Plan locked: cap/).waitFor()); await hush()
 
 // 6. Run
@@ -133,9 +138,11 @@ await say('06 Run', 'Old and new on the same inputs, plus old-vs-old repeats to 
 const done = page.getByRole('button', { name: 'View the report' })
 const asks = page.getByRole('heading', { name: /Hard cap reached|deep dive would exceed/ })
 for (let i = 0; i < 6 && !(await done.isVisible()); i++) {
-  await fast(() => done.or(asks).waitFor({ timeout: 120_000 }))
-  if (await asks.isVisible()) { await fill(page.getByLabel('Extend by (USD)'), '5'); await click(page.getByRole('button', { name: 'Extend and continue' })) }
+  await fast(() => done.or(asks).waitFor({ timeout: 900_000 }))
+  if (await asks.isVisible()) { await say('06 Run', 'The cap was reached. It paused and asked before spending more.', 2600); await fill(page.getByLabel('Extend by (USD)'), REAL ? '0.5' : '5'); await click(page.getByRole('button', { name: 'Extend and continue' })) }
 }
+const spent = (await page.getByText(/^Spent \$/).first().innerText().catch(() => '')).trim()
+console.log('SPENT:', spent)
 await hush(); await click(done)
 
 // 7. Report (the outcome)
@@ -146,16 +153,18 @@ console.log('VERDICT TEXT:', JSON.stringify(vt))
 const reason = (vt[1] ?? '').replace(/^block:\s*/, '').replace(/\s*on severity.*$/, '').replace(/\s*\(p=.*?\)/, '')
 await say('07 Verdict', `${vt[0].toUpperCase()}. ${reason}.`, 5200)
 await show(page.getByRole('img', { name: /Difference per metric/ }), 600)
-await say('07 Verdict', 'Per metric: shorter answers are fixed, quality regressed. Paired and noise-adjusted.', 4200)
+await say('07 Verdict', 'Per metric: the paired difference with a 95% interval, adjusted for noise.', 4200)
 await show(page.getByRole('heading', { name: 'Scope stamp' }), 600)
-await say('07 Verdict', 'The scope stamp says exactly what was tested. It never claims more.', 4200); await hush()
+await say('07 Verdict', 'The scope stamp says exactly what was tested. It never claims more.', 4200)
+if (REAL && spent) await say('07 Verdict', `${spent.replace(/\s+of\s+.*$/, '')} on real Gemini for the whole run.`, 3200)
+await hush()
 
 // 8. Refine
 await click(step('Refine'))
-await fill(page.getByLabel(/^Hard cap/), '5'); await fill(page.getByLabel(/^Search size/), '30')
+await fill(page.getByLabel(/^Hard cap/), REAL ? '0.5' : '5'); await fill(page.getByLabel(/^Search size/), REAL ? '20' : '30')
 await click(page.getByRole('button', { name: 'Start optimization' }))
-await fast(() => page.getByRole('heading', { name: /Optimization [a-z0-9]{6}/ }).waitFor({ timeout: 120_000 }))
-await fast(() => page.locator('span', { hasText: /^(done|paused)$/ }).first().waitFor({ timeout: 120_000 })); await wait(500)
+await fast(() => page.getByRole('heading', { name: /Optimization [a-z0-9]{6}/ }).waitFor({ timeout: 900_000 }))
+await fast(() => page.locator('span', { hasText: /^(done|paused)$/ }).first().waitFor({ timeout: 900_000 })); await wait(500)
 await show(page.getByRole('heading', { name: /Optimization [a-z0-9]{6}/ }), 600)
 await say('08 Refine', 'If something broke, it searches for a better prompt and validates it on held-out cases.', 3600); await hush(); await wait(300)
 

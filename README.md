@@ -2,9 +2,9 @@
 
 You changed a prompt. Did it fix what you wanted, and did it break anything else? This tool answers that without a labelled dataset: agents plan scenarios and metrics (you steer at every step), run the old and new prompt side by side, and report paired, noise-adjusted results scoped to what was actually tested. Optionally it proposes a refined prompt (DSPy GEPA) and validates it on held-out scenarios.
 
-![Prompt Mortem walkthrough: setup, scenarios, budget, run and a blocking verdict](docs/media/promptmortem-demo.gif)
+![Prompt Mortem walkthrough: setup, scenarios, budget, a real run and the verdict](docs/media/promptmortem-demo.gif)
 
-[Watch the full two-minute walkthrough (mp4)](docs/media/promptmortem-demo.mp4). It is a real run of the UI against the offline demo models: the old prompt is wordy but safe, the new one is concise but regresses, and Prompt Mortem blocks it and says why.
+[Watch the full 2.5-minute walkthrough (mp4)](docs/media/promptmortem-demo.mp4). It is a real run on Gemini (`gemini-2.5-flash`) with the bundled billing-bot example: the old prompt is wordy, the new one is concise, and Prompt Mortem checks the change. The run hit its hard cap once and paused to ask before spending more. The verdict was "Looks fine": 25 cases improved, none broke, for $0.94 in the run itself.
 
 Full project documentation is in [documentation/](documentation/README.md). See also `PLAN.md` (intent and design) and `CLAUDE.md` (principles). Per-stage notes are in `docs/`.
 
@@ -92,7 +92,7 @@ npm i && npx playwright install chromium
 BASE_URL=http://localhost:8000 OUT=./demo-out node demo/record.mjs
 ```
 
-`demo/record.mjs` drives the real UI with captions and writes a `.webm` plus the timing of every caption and every wait on a model call. It uses the offline `fake/*` models, so it costs nothing and is repeatable.
+`demo/record.mjs` drives the real UI with captions and writes a `.webm` plus the timing of every caption and every wait on a model call. By default it uses the offline `fake/*` models, so it costs nothing and is repeatable. With `DEMO_MODE=real` it uses the server's real models and the unmodified example prompts (the published video was recorded this way, about $1 of Gemini with a reduced scenario plan).
 
 ## License
 

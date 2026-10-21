@@ -48,6 +48,7 @@ The tests check that the tool flags the regression, credits the improvement, doe
 | `test_m8.py` | GEPA: split, held-out isolation, validation, cap |
 | `test_m9.py` | auth token, redaction, example project |
 | `test_m10.py` | gap-closing against PLAN: drafting the new prompt, saved notes, optional variables, cheap judge, second judge, old-prompt probes for regression guards, verdict feedback, restart recovery, stale tracking |
+| `test_harness.py` | cassette record/replay (`app/core/cassette.py`), faults injected into the model provider (fenced, truncated, garbage JSON, timeouts), and CLAUDE.md principles as asserts (no provider call outside `LLMClient`, blind judge prompts, complete scope stamp) |
 | `test_verdicts.py` | known-answer tests for the statistics |
 | `test_web.py` | single-port serving, SPA fallback, token behaviour |
 | `test_no_secrets.py` | the secret scanner and that no key is in the tree |
@@ -86,4 +87,4 @@ cd frontend
 BASE_URL=http://localhost:8000 OUT=./demo-out node demo/record.mjs
 ```
 
-The demo's story: the old prompt is wordy but safe, the new one is short but regresses, and Prompt Mortem blocks it and says why.
+The published demo (`DEMO_MODE=real`) is a real Gemini run of the billing-bot example: a concise new prompt checked against a wordy old one. It ended "Looks fine" with 25 cases improved. The offline mode plants a regression instead, so it ends in BLOCK.
