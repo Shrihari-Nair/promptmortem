@@ -61,10 +61,12 @@ export default function Setup({ onCreated }: { onCreated: (p: Project) => void }
   const vars = useMemo(() => templateVars(oldP, newP), [oldP, newP])
   const schema = Object.fromEntries(vars.map((v) => [v, types[v] ?? 'string']))
 
+  /** The drafter needs a request: the user's own words, else the stated problem, else a general improve-it instruction. */
+  const changeRequest = change.trim() || (f.known_failure_notes.trim() ? `Fix this problem with the current prompt: ${f.known_failure_notes.trim()}` : 'No specific change was requested. Improve this prompt: close gaps against the non-negotiable constraints, remove ambiguity and filler, keep its purpose and structure.')
   const draft = async () => {
     setDrafting(true); setDraftErr('')
     try {
-      const r = await api<{ prompt: string; notes: string[] }>('/prompts/draft', { method: 'POST', body: JSON.stringify({ old_prompt: oldP, change_request: change, app_description: f.app_description, constraints: f.constraints, model: f.judge_model_default || undefined }) })
+      const r = await api<{ prompt: string; notes: string[] }>('/prompts/draft', { method: 'POST', body: JSON.stringify({ old_prompt: oldP, change_request: changeRequest, app_description: f.app_description, constraints: f.constraints, model: f.judge_model_default || undefined }) })
       setNewP(r.prompt); setDraftNotes(r.notes)
     } catch (e) { setDraftErr(String(e)) }
     setDrafting(false)
@@ -126,8 +128,8 @@ export default function Setup({ onCreated }: { onCreated: (p: Project) => void }
           <Textarea mono label="New prompt" rows={12} value={newP} onChange={(e) => setNewP(e.target.value)} />
         </div>
         <div className="mt-5 space-y-3 rounded-2xl bg-sunken p-4">
-          <Textarea label="Or describe the change and let the tool draft the new prompt" help="The draft fills the new prompt above. Review and edit it; nothing is saved until you continue." rows={2} placeholder="Answer in under 120 words and never promise refunds." value={change} onChange={(e) => setChange(e.target.value)} />
-          <Button variant="secondary" size="sm" disabled={!oldP.trim() || !change.trim() || drafting} onClick={draft}>{drafting ? 'Drafting' : 'Draft new prompt'}</Button>
+          <Textarea label="Or describe the change and let the tool draft the new prompt" help="Optional. Leave empty to draft from your old prompt alone: it uses “What is wrong with the current prompt” if you filled it in, otherwise it tightens the prompt against your constraints. Review and edit the draft; nothing is saved until you continue." rows={2} placeholder="Answer in under 120 words and never promise refunds." value={change} onChange={(e) => setChange(e.target.value)} />
+          <Button variant="secondary" size="sm" disabled={!oldP.trim() || drafting} onClick={draft}>{drafting ? 'Drafting' : 'Draft new prompt'}</Button>
           {draftNotes.length > 0 && <ul className="list-disc space-y-0.5 pl-5 text-[13px] text-muted">{draftNotes.map((n, i) => <li key={i}>{n}</li>)}</ul>}
           {draftErr && <p role="alert" className="text-[13px] text-bad">{draftErr}</p>}
         </div>
