@@ -93,3 +93,7 @@ BASE_URL=http://localhost:8000 OUT=./demo-out node demo/record.mjs
 ```
 
 `demo/record.mjs` drives the real UI with captions and writes a `.webm` plus the timing of every caption and every wait on a model call. It uses the offline `fake/*` models, so it costs nothing and is repeatable.
+
+## License
+
+MIT. See [LICENSE](LICENSE).

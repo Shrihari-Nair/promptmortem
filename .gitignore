@@ -32,3 +32,7 @@ coverage/
 .claude/settings.local.json
 .claude/*.local.*
 brag-output/
+
+# agent tooling (design/video skills): used locally while building, not part of the product
+.agents/
+.claude/
