@@ -51,6 +51,7 @@ Each of these was found by running against real Gemini and fixed.
 - **Version 1 scope:** single-turn text prompts, one user, local only.
 - **Synthetic benchmark:** the quoted error rates describe the benchmark's noise model, not every real model.
 - **Judge blind spots:** judges can share weaknesses with the model under test. Calibration and the optional second judge help but do not remove this.
+- **Planning spend is uncapped and only partly attributed:** it is shown (report cost block, `/projects/{pid}/spend`) but not limited, and calls from endpoints keyed by metric, cluster, optimization or report id are not tagged to a project.
 - **Repeat budget:** noisy pairwise judges may not reach significance for single cases within the repeat limit. They are then reported as inconclusive, and the metric-level tests still apply.
 - **One model per run:** a result for one target model does not carry over to another.
 - **Refinement is not resumable:** GEPA cannot resume, but retrying replays paid work from the cache for free.

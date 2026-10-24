@@ -131,6 +131,7 @@ def main():
         change = f"{x['old_pass_rate']} -> {x['new_pass_rate']}" if x.get("old_pass_rate") is not None else f"preference for new {x.get('preference_for_new')}"
         print(f"    regression [{x['cluster']}] severity {x['severity']} {x['metric_name']}: {change}")
     print(f"    cost: spent ${rep['cost']['spent']:.4f}; estimated ${rep['cost']['estimated']} (high {rep['cost']['estimated_high']})")
+    print(f"    planning (outside the cap): ${rep['cost']['planning_spent']:.4f}; total for the project: ${rep['cost']['planning_spent'] + rep['cost']['spent']:.4f}")
 
     if a.optimize:
         step(7, f"GEPA refinement (hard cap ${a.optimize_cap})")

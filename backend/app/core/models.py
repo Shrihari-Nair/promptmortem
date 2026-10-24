@@ -206,6 +206,7 @@ class LLMCall(SQLModel, table=True):
     cost: float = 0.0
     latency: float = 0.0
     run_id: str | None = Field(default=None, index=True)  # run that paid for the call (cache hits are not logged)
+    project_id: str | None = Field(default=None, index=True)
     tag: str | None = None  # agent name, or "target" for the application under test
     created_at: datetime = Field(default_factory=now)
 

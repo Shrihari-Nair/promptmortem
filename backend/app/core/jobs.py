@@ -6,7 +6,7 @@ from collections.abc import Awaitable, Callable
 from sqlalchemy import Engine
 from sqlmodel import Session
 
-from app.core.llm import BudgetExceeded
+from app.core.llm import BudgetExceeded, current_project
 from app.core.secrets import redact
 from app.core.models import Job
 
@@ -30,6 +30,7 @@ def start_job(engine: Engine, project_id: str | None, kind: str,
             s.commit()
 
     async def run():
+        current_project.set(project_id)  # tags every paid call this job makes
         update(status="running")
         try:
             update(status="done", result=await fn(lambda msg: update(progress=msg)))

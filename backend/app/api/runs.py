@@ -12,7 +12,7 @@ from app.core.db import get_session
 from app.core.jobs import start_job
 from app.core.llm import LLMClient
 from app.core.models import Feedback, Plan, Report, Run
-from app.core.trace import run_trace
+from app.core.trace import project_spend, run_trace
 from app.pipeline import report as rpt
 from app.pipeline import runner
 from app.pipeline.planner import PlanError
@@ -31,6 +31,11 @@ def _start(s: Session, client: LLMClient, run: Run) -> dict:
     engine, rid = s.get_bind(), run.id
     plan_pid = s.get(Plan, run.plan_id).project_id
     return {"run_id": rid, "job_id": start_job(engine, plan_pid, "run", lambda progress: runner.execute_run(engine, client, rid))}
+
+
+@router.get("/projects/{pid}/spend")
+def spend(pid: str, s: Session = Depends(get_session)):
+    return project_spend(s.get_bind(), pid)
 
 
 @router.get("/runs/{rid}/trace")

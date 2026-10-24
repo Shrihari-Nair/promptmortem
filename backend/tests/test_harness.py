@@ -12,6 +12,7 @@ from app.core import cassette
 from app.core.fake_llm import fake_provider
 from app.core.llm import LLMClient
 from app.core.models import LLMCall
+from tests.conftest import make_project
 from tests.golden import golden, run_to_end
 
 APP = Path(__file__).resolve().parents[1] / "app"
@@ -129,3 +130,15 @@ def test_run_trace_attributes_paid_calls_to_the_run_and_agent(client, engine):
     with Session(engine) as s:  # the run's own cost log never exceeds what the run says it spent
         assert t["cost"] <= s.get(__import__("app.core.models", fromlist=["Run"]).Run, rid).spent + 1e-9
     assert client.get("/runs/nope/trace").status_code == 404
+
+
+def test_project_spend_separates_planning_from_runs(client, engine):
+    p = make_project(client)  # stage-1 analysis runs agents: paid planning calls, no run yet
+    s0 = client.get(f"/projects/{p['id']}/spend").json()
+    assert s0["planning"] > 0 and s0["in_runs"] == 0 and s0["total"] == s0["planning"]
+    pid = golden(client, engine, "noop", n_each=5)
+    rid, _ = run_to_end(client, pid)
+    s1 = client.get(f"/projects/{pid}/spend").json()
+    cost = client.get(f"/runs/{rid}/report").json()["summary"]["cost"]
+    assert s1["in_runs"] == pytest.approx(cost["spent"]) and cost["planning_spent"] == pytest.approx(s1["planning"])
+    assert s1["total"] == pytest.approx(s1["planning"] + s1["in_runs"]) and s1["planning"] > 0  # the probe is planning spend

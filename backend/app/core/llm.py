@@ -17,6 +17,7 @@ load_dotenv(Path(__file__).resolve().parents[3] / ".env")  # the project-root .e
 
 
 current_run: ContextVar[str | None] = ContextVar("current_run", default=None)  # set by the runner; tags paid calls
+current_project: ContextVar[str | None] = ContextVar("current_project", default=None)  # set by start_job
 
 
 class BudgetExceeded(Exception):
@@ -103,7 +104,7 @@ class LLMClient:
         latency = time.perf_counter() - t0
         with Session(self.engine) as s:
             s.add(LLMCall(cache_key=key, model=model, response=text, tokens_in=tin,
-                          tokens_out=tout, cost=cost, latency=latency, run_id=current_run.get(), tag=tag))
+                          tokens_out=tout, cost=cost, latency=latency, run_id=current_run.get(), project_id=current_project.get(), tag=tag))
             s.commit()
         if budget:
             budget.spent += cost

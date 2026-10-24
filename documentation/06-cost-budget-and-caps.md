@@ -71,4 +71,5 @@ Calls are cached in the database by a hash of (model, messages, parameters, seed
 
 - Target-model replies are about 70% of real run cost, since judges run with thinking off.
 - Hidden reasoning tokens are billed as output on Gemini 2.5, so turning them off for judges and generators was the biggest saving.
+- **Planning is outside the cap.** The cap governs the comparison run only. Analysis, scenario generation, metric design, judge calibration and the cost probe are paid before it and are not capped. On the real smoke run with `--cap 0.25`, planning added about $0.27 (total about $0.53). The report's cost block and `GET /projects/{pid}/spend` show planning spend next to run spend, and `scripts/pipeline_smoke.py` prints both.
 - A typical full demo on the offline model costs nothing. A real small run on Gemini Flash costs cents. The real-model smoke script is normally run with a small cap such as `--cap 0.50`.

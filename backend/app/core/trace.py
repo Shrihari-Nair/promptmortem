@@ -6,6 +6,16 @@ from sqlmodel import Session, select
 from app.core.models import LLMCall
 
 
+def project_spend(engine: Engine, project_id: str) -> dict:
+    """Everything a project has paid for. Planning (analysis, scenarios, metrics, calibration, the cost probe) is outside any run
+    cap, so `planning` is shown next to `in_runs`, which is what the caps govern."""
+    with Session(engine) as s:
+        rows = s.exec(select(LLMCall).where(LLMCall.project_id == project_id)).all()
+    runs = sum(r.cost for r in rows if r.run_id)
+    plan = sum(r.cost for r in rows if not r.run_id)
+    return {"project_id": project_id, "planning": round(plan, 6), "in_runs": round(runs, 6), "total": round(plan + runs, 6)}
+
+
 def run_trace(engine: Engine, run_id: str) -> dict:
     with Session(engine) as s:
         rows = s.exec(select(LLMCall).where(LLMCall.run_id == run_id)).all()

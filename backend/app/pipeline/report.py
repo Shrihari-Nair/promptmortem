@@ -6,6 +6,7 @@ from sqlalchemy import Engine
 from sqlmodel import Session, select
 
 from app.config import settings
+from app.core.trace import project_spend
 from app.core.models import Calibration, Feedback, Metric, Plan, Project, Report, Run, RunResult, Score, Scenario, ScenarioCluster
 from app.pipeline import verdicts as V
 from app.pipeline.collect import collect, metric_verdicts, noise_vars, worst_var
@@ -207,7 +208,8 @@ def analyze(s: Session, run_id: str) -> dict:
     return {"run_id": run_id, "compare": {"base": cfg.get("base_label", "old"), "test": cfg.get("test_label", "new")}, "headline": headline, "scope": scope, "regressions": regressions, "improvements": improvements,
             "inconclusive": inconclusive, "per_metric": per_metric, "per_category": group(lambda x: x.category),
             "per_cluster": group(lambda x: clusters.get(x.cluster_id, "(none)")), "judge_reliability": reliability,
-            "cost": {"estimated": cfg.get("expected_cost"), "estimated_high": cfg.get("high_cost"), "spent": round(run.spent, 6), "cap": run.budget_cap, "probe_spent": probe_paid},
+            "cost": {"estimated": cfg.get("expected_cost"), "estimated_high": cfg.get("high_cost"), "spent": round(run.spent, 6), "cap": run.budget_cap, "probe_spent": probe_paid,
+                     "planning_spent": project_spend(s.get_bind(), plan.project_id)["planning"]},  # outside the cap; total = planning + spent
             "warnings": run.warnings or [], "overrides": over}
 
 
@@ -364,5 +366,6 @@ def to_markdown(rep: dict) -> str:
     L += ["", "## Judge reliability", "", f"- Calibration agreement with your labels: {j['calibration_agreement']} (Cohen's kappa, chance-corrected: {j.get('calibration_kappa')})",
           f"- Judge model(s): {', '.join(sc.get('judge_models') or []) or 'none or not recorded'}",
           f"- Pairwise A/B disagreement rate: {j['pairwise_disagreement_rate']} over {j['pairwise_judgments']} judgments", "",
-          "## Cost", "", f"- Estimated {cst['estimated']}, spent {cst['spent']}, cap {cst['cap']}"]
+          "## Cost", "", f"- Estimated {cst['estimated']}, spent {cst['spent']}, cap {cst['cap']}",
+          f"- Planning spend outside the cap (analysis, scenarios, metrics, calibration, probe): {cst.get('planning_spent')}"]
     return "\n".join(L) + "\n"

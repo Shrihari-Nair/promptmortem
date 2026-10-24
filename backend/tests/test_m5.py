@@ -171,9 +171,9 @@ def test_clear_regressions_stop_early_and_are_reported_live(client, engine):
                 if evs[-1]["type"] in ("done", "paused", "failed", "stopped"):
                     break
     kinds = [e["type"] for e in evs]
-    assert kinds[0] == "snapshot" and kinds[-1] == "done"
+    assert kinds[0] == "snapshot" and kinds[-1] == "done", kinds[-10:]  # shows what a flaky run saw
     for k in ("noise", "progress", "regression"):
-        assert k in kinds
+        assert k in kinds, (k, kinds[:10], len(kinds))
     stages = [e["stage"] for e in evs if e["type"] == "stage"]
     assert stages.index("smoke") < stages.index("main") and "deep_dive" in stages
     assert kinds.index("noise") < kinds.index("regression")  # noise is known before regressions are surfaced
